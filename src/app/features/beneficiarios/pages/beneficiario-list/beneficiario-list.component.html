@@ -1,0 +1,83 @@
+<div class="p-6 md:p-10 bg-base-200 min-h-screen">
+  <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <h1 class="text-3xl font-bold text-base-content">Nómina de Beneficiarios</h1>
+    <button class="btn btn-primary">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6 mr-2"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Nuevo Beneficiario
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="flex flex-col items-center justify-center p-12">
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+      <p class="mt-4 text-base-content/70 font-medium">Cargando nómina...</p>
+    </div>
+  } @else if (error()) {
+    <div class="alert alert-error shadow-lg my-4">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="stroke-current shrink-0 h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <span>{{ error() }}</span>
+      <button class="btn btn-sm" (click)="cargarBeneficiarios()">Reintentar</button>
+    </div>
+  } @else {
+    <div class="card bg-base-100 shadow-xl overflow-x-auto">
+      <table class="table table-zebra w-full">
+        <thead class="bg-base-300 text-base-content text-sm">
+          <tr>
+            <th>Nombre Completo</th>
+            <th>DNI</th>
+            <th>Rama Actual</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (b of beneficiarios(); track b.id_beneficiario) {
+            <tr class="hover">
+              <td class="font-medium">{{ b.apellido }}, {{ b.nombre }}</td>
+              <td>{{ b.dni }}</td>
+              <td>
+                <div
+                  class="badge badge-outline"
+                  [class.badge-warning]="b.rama_actual === 'Manada'"
+                  [class.badge-success]="b.rama_actual === 'Unidad'"
+                  [class.badge-info]="b.rama_actual === 'Caminantes'"
+                  [class.badge-error]="b.rama_actual === 'Rovers'"
+                >
+                  {{ b.rama_actual }}
+                </div>
+              </td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-ghost text-primary">Editar</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="text-center py-8 text-base-content/50">
+                No hay beneficiarios registrados en el sistema.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
