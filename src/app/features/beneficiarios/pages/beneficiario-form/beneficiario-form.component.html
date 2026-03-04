@@ -1,0 +1,150 @@
+<div class="p-6 md:p-10 bg-base-200 min-h-screen">
+  <div class="max-w-2xl mx-auto">
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-3xl font-bold text-base-content">
+        {{ beneficiarioId ? 'Editar Beneficiario' : 'Nuevo Beneficiario' }}
+      </h1>
+      <button routerLink="/beneficiarios" class="btn btn-ghost">Volver</button>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        @if (errorMsg()) {
+          <div class="alert alert-error mb-4 shadow-lg">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="stroke-current shrink-0 h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>{{ errorMsg() }}</span>
+            <button class="btn btn-sm btn-ghost" (click)="errorMsg.set(null)">X</button>
+          </div>
+        }
+        @if (cargando()) {
+          <div class="flex flex-col items-center justify-center p-12">
+            <span class="loading loading-spinner loading-lg text-primary"></span>
+            <p class="mt-4 text-base-content/70 font-medium">Cargando datos del scout...</p>
+          </div>
+        } @else {
+          <form [formGroup]="beneficiarioForm" (ngSubmit)="guardar()">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text font-medium">Nombre</span></div>
+                <input
+                  type="text"
+                  formControlName="nombre"
+                  placeholder="Ej: Bautista"
+                  class="input input-bordered w-full"
+                  [class.input-error]="
+                    beneficiarioForm.get('nombre')?.invalid &&
+                    beneficiarioForm.get('nombre')?.touched
+                  "
+                />
+              </label>
+
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text font-medium">Apellido</span></div>
+                <input
+                  type="text"
+                  formControlName="apellido"
+                  placeholder="Ej: Scout"
+                  class="input input-bordered w-full"
+                  [class.input-error]="
+                    beneficiarioForm.get('apellido')?.invalid &&
+                    beneficiarioForm.get('apellido')?.touched
+                  "
+                />
+              </label>
+
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text font-medium">DNI</span></div>
+                <input
+                  type="text"
+                  formControlName="dni"
+                  placeholder="Sin puntos"
+                  class="input input-bordered w-full"
+                  [class.input-error]="
+                    beneficiarioForm.get('dni')?.invalid && beneficiarioForm.get('dni')?.touched
+                  "
+                />
+              </label>
+
+              <label class="form-control w-full">
+                <div class="label">
+                  <span class="label-text font-medium">Fecha de Nacimiento</span>
+                </div>
+                <input
+                  type="date"
+                  formControlName="fecha_nacimiento"
+                  class="input input-bordered w-full"
+                  [class.input-error]="
+                    beneficiarioForm.get('fecha_nacimiento')?.invalid &&
+                    beneficiarioForm.get('fecha_nacimiento')?.touched
+                  "
+                />
+              </label>
+
+              <div class="form-control w-full md:col-span-2">
+                <div class="label"><span class="label-text font-medium">Rama Actual</span></div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-warning"
+                    [class.btn-outline]="beneficiarioForm.get('rama_actual')?.value !== 'Manada'"
+                    (click)="beneficiarioForm.patchValue({ rama_actual: 'Manada' })"
+                  >
+                    Manada
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    [class.btn-outline]="beneficiarioForm.get('rama_actual')?.value !== 'Unidad'"
+                    (click)="beneficiarioForm.patchValue({ rama_actual: 'Unidad' })"
+                  >
+                    Unidad
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-info"
+                    [class.btn-outline]="
+                      beneficiarioForm.get('rama_actual')?.value !== 'Caminantes'
+                    "
+                    (click)="beneficiarioForm.patchValue({ rama_actual: 'Caminantes' })"
+                  >
+                    Caminantes
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-error"
+                    [class.btn-outline]="beneficiarioForm.get('rama_actual')?.value !== 'Rovers'"
+                    (click)="beneficiarioForm.patchValue({ rama_actual: 'Rovers' })"
+                  >
+                    Rovers
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+              <button type="submit" class="btn btn-primary w-full md:w-auto">
+                {{ beneficiarioId ? 'Guardar Cambios' : 'Crear Beneficiario' }}
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,17 +1,19 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { BeneficiarioService } from '../../../../core/services/beneficiario.service';
 import { Beneficiario } from '../../../../models/beneficiario.model';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-beneficiario-list',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './beneficiario-list.component.html',
 })
 export class BeneficiarioListComponent implements OnInit {
   private beneficiarioService = inject(BeneficiarioService);
 
   public beneficiarios = signal<Beneficiario[]>([]);
+  public beneficiarioSeleccionado = signal<any>(null);
   public cargando = signal<boolean>(true);
   public error = signal<string | null>(null);
 
@@ -36,5 +38,23 @@ export class BeneficiarioListComponent implements OnInit {
         this.cargando.set(false);
       },
     });
+  }
+
+  prepararBorrado(beneficiario: any) {
+    this.beneficiarioSeleccionado.set(beneficiario);
+    const modal = document.getElementById('modal_confirmar_borrado') as HTMLDialogElement;
+    modal?.showModal();
+  }
+
+  confirmarBorrado() {
+    const b = this.beneficiarioSeleccionado();
+    if (b) {
+      this.beneficiarioService.deleteBeneficiario(b.id_beneficiario).subscribe({
+        next: () => {
+          this.cargarBeneficiarios();
+          this.beneficiarioSeleccionado.set(null);
+        },
+      });
+    }
   }
 }

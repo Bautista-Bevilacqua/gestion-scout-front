@@ -1,18 +1,7 @@
 <div class="p-6 md:p-10 bg-base-200 min-h-screen">
   <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
     <h1 class="text-3xl font-bold text-base-content">Nómina de Beneficiarios</h1>
-    <button class="btn btn-primary">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-6 w-6 mr-2"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      Nuevo Beneficiario
-    </button>
+    <button routerLink="/beneficiarios/nuevo" class="btn btn-primary">Nuevo Beneficiario</button>
   </div>
 
   @if (cargando()) {
@@ -66,7 +55,41 @@
                 </div>
               </td>
               <td class="text-center">
-                <button class="btn btn-sm btn-ghost text-primary">Editar</button>
+                <div class="flex justify-center gap-2">
+                  <button
+                    [routerLink]="['/beneficiarios/editar', b.id_beneficiario]"
+                    class="btn btn-sm btn-outline btn-primary"
+                  >
+                    Editar
+                  </button>
+
+                  <button class="btn btn-sm btn-outline btn-error" (click)="prepararBorrado(b)">
+                    Eliminar
+                  </button>
+
+                  <dialog id="modal_confirmar_borrado" class="modal modal-bottom sm:modal-middle">
+                    <div class="modal-box border-t-4 border-error">
+                      <h3 class="font-bold text-lg">¿Confirmar eliminación?</h3>
+                      <p class="py-4">
+                        Estás por borrar a
+                        <strong
+                          >{{ beneficiarioSeleccionado()?.nombre }}
+                          {{ beneficiarioSeleccionado()?.apellido }}</strong
+                        >. Esta acción es permanente.
+                      </p>
+                      <div class="modal-action">
+                        <form method="dialog">
+                          <button class="btn btn-ghost">Cancelar</button>
+                        </form>
+                        <form method="dialog">
+                          <button class="btn btn-error" (click)="confirmarBorrado()">
+                            Eliminar definitivamente
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </dialog>
+                </div>
               </td>
             </tr>
           } @empty {
