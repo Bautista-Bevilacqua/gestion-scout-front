@@ -1,14 +1,20 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './shared/layout/main-layout/main-layout.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/pages/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
     path: '',
-    component: MainLayoutComponent, // El Layout es el contenedor principal
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'beneficiarios', pathMatch: 'full' },
 
-      // Delegamos todas las rutas que empiecen con 'beneficiarios' a su propio archivo
       {
         path: 'beneficiarios',
         loadChildren: () =>
@@ -16,8 +22,6 @@ export const routes: Routes = [
             (m) => m.beneficiariosRoutes,
           ),
       },
-
-      // Delegamos todas las rutas que empiecen con 'familias' a su propio archivo
       {
         path: 'familias',
         loadChildren: () =>
@@ -25,7 +29,4 @@ export const routes: Routes = [
       },
     ],
   },
-
-  // Si tuvieras un Login, va AFUERA del MainLayout para que no se vea la barra lateral
-  // { path: 'login', loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent) }
 ];

@@ -1,0 +1,56 @@
+<div class="min-h-screen bg-base-200 flex items-center justify-center p-4">
+  <div class="card w-full max-w-md bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="text-center mb-6">
+        <h2 class="text-4xl font-black text-base-content flex gap-1 items-baseline justify-center">
+          Grupo
+          <span class="flex tracking-wider ml-1">
+            <span class="text-red-700">1</span><span class="text-green-500">0</span
+            ><span class="text-red-700">8</span>
+          </span>
+        </h2>
+        <p class="text-base-content/60 mt-2">Ingreso al Sistema de Gestión</p>
+      </div>
+
+      @if (errorMsg()) {
+        <div class="alert alert-error mb-4 text-sm">
+          <span>{{ errorMsg() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="ingresar()" class="flex flex-col gap-4">
+        <label class="form-control w-full">
+          <div class="label">
+            <span class="label-text font-bold">Correo Electrónico</span>
+          </div>
+          <input
+            type="email"
+            formControlName="email"
+            class="input input-bordered w-full focus:input-primary transition-colors"
+            placeholder="admin@admin.com"
+          />
+        </label>
+
+        <label class="form-control w-full">
+          <div class="label">
+            <span class="label-text font-bold">Contraseña</span>
+          </div>
+          <input
+            type="password"
+            formControlName="password"
+            class="input input-bordered w-full focus:input-primary transition-colors"
+            placeholder="••••••••"
+          />
+        </label>
+
+        <button
+          type="submit"
+          class="btn btn-primary mt-6 w-full text-lg"
+          [disabled]="loginForm.invalid"
+        >
+          Iniciar Sesión
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
