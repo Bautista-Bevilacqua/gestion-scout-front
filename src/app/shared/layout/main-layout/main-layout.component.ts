@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -9,6 +10,24 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   templateUrl: './main-layout.component.html',
 })
 export class MainLayoutComponent {
-  // Más adelante acá podés inyectar tu AuthService para traer el nombre del usuario real
-  public usuarioActual = 'Admin Scout';
+  private authService = inject(AuthService);
+  public usuarioActual = this.authService.usuarioActual;
+
+  public nombreCompleto = computed(() => {
+    const user = this.usuarioActual();
+    if (!user) return 'Usuario Invitado';
+    return `${user.nombre} ${user.apellido}`;
+  });
+
+  // 3. Creamos otra señal para sacar las iniciales (ej: "Juan Perez" -> "JP")
+  public iniciales = computed(() => {
+    const user = this.usuarioActual();
+    if (!user) return '??';
+    return `${user.nombre.charAt(0)}${user.apellido.charAt(0)}`.toUpperCase();
+  });
+
+  // 4. Método para el botón de cerrar sesión
+  cerrarSesion() {
+    this.authService.logout();
+  }
 }

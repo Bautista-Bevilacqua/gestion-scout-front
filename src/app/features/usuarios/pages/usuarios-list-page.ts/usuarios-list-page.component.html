@@ -1,0 +1,45 @@
+<div class="p-6 md:p-10 bg-base-200 min-h-screen relative">
+  <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <h1 class="text-3xl font-bold text-base-content capitalize">Nómina de Dirigentes</h1>
+
+    <div class="flex gap-2">
+      <button class="btn btn-ghost" (click)="cargarUsuarios(true)">↻ Refrescar</button>
+
+      @if (authService.usuarioActual()?.rol === 'ADMIN') {
+        <button routerLink="/usuarios/nuevo" class="btn btn-primary">Nuevo Dirigente</button>
+      }
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <app-loading-spinner texto="Cargando nómina de dirigentes..."></app-loading-spinner>
+  } @else if (error()) {
+    <div class="flex flex-col gap-4">
+      <app-alert-error [mensaje]="error()" (cerrar)="limpiarError()"></app-alert-error>
+      <button class="btn btn-outline self-center" (click)="cargarUsuarios()">
+        Reintentar carga
+      </button>
+    </div>
+  } @else {
+    <app-users-table
+      [usuarios]="usuarios()"
+      [esAdmin]="authService.usuarioActual()?.rol === 'ADMIN'"
+      (onEliminar)="prepararBorrado($event)"
+    >
+    </app-users-table>
+  }
+  <app-confirm-modal
+    modalId="modal_borrar_usuario"
+    titulo="¿Confirmar eliminación?"
+    [mensaje]="
+      'Estás por borrar al dirigente <strong>' +
+      (usuarioSeleccionado()?.nombre || '') +
+      ' ' +
+      (usuarioSeleccionado()?.apellido || '') +
+      '</strong>. Perderá inmediatamente el acceso al sistema y esta acción no se puede deshacer.'
+    "
+    textoBoton="Eliminar definitivamente"
+    (confirmar)="confirmarBorrado()"
+  >
+  </app-confirm-modal>
+</div>

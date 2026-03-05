@@ -1,0 +1,58 @@
+<div class="card bg-base-100 shadow-xl overflow-x-auto">
+  <table class="table table-zebra w-full">
+    <thead class="bg-base-300 text-base-content text-sm">
+      <tr>
+        <th>Nombre Completo</th>
+        <th>DNI</th>
+        <th>Email</th>
+        <th>Rol / Rama</th>
+        @if (esAdmin) {
+          <th class="text-center">Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (u of usuarios; track u.id_usuario) {
+        <tr class="hover">
+          <td class="font-medium">{{ u.apellido }}, {{ u.nombre }}</td>
+          <td>{{ u.dni }}</td>
+          <td>{{ u.email }}</td>
+          <td>
+            <div
+              class="badge badge-outline"
+              [class.badge-primary]="u.rol === 'ADMIN'"
+              [class.badge-warning]="u.rol === 'MANADA'"
+              [class.badge-success]="u.rol === 'UNIDAD'"
+              [class.badge-info]="u.rol === 'CAMINANTES'"
+              [class.badge-error]="u.rol === 'ROVERS'"
+            >
+              {{ u.rol }}
+            </div>
+          </td>
+
+          @if (esAdmin) {
+            <td class="text-center">
+              <div class="flex justify-center gap-2">
+                <button
+                  [routerLink]="['/usuarios/editar', u.id_usuario]"
+                  class="btn btn-sm btn-outline btn-primary"
+                >
+                  Editar
+                </button>
+                <button class="btn btn-sm btn-outline btn-error" (click)="eliminar(u)">
+                  Eliminar
+                </button>
+              </div>
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr>
+          <td [attr.colspan]="esAdmin ? 5 : 4" class="text-center py-8 text-base-content/50">
+            No hay dirigentes registrados en el sistema.
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

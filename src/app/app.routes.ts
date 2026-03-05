@@ -1,14 +1,28 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './shared/layout/main-layout/main-layout.component';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/pages/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'change-password',
+    loadComponent: () =>
+      import('./features/auth/pages/cambiar-password-page/cambiar-password-page.component').then(
+        (m) => m.CambiarPasswordPageComponent,
+      ),
+  },
+  {
     path: '',
-    component: MainLayoutComponent, // El Layout es el contenedor principal
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'beneficiarios', pathMatch: 'full' },
 
-      // Delegamos todas las rutas que empiecen con 'beneficiarios' a su propio archivo
       {
         path: 'beneficiarios',
         loadChildren: () =>
@@ -16,16 +30,20 @@ export const routes: Routes = [
             (m) => m.beneficiariosRoutes,
           ),
       },
-
-      // Delegamos todas las rutas que empiecen con 'familias' a su propio archivo
       {
         path: 'familias',
+        canActivate: [roleGuard], // <-- PATOVICA DE ROL
+        data: { roles: ['ADMIN'] }, // <-- SOLO ADMIN
         loadChildren: () =>
           import('./features/familias/familias.routes').then((m) => m.familiasRoutes),
       },
+      {
+        path: 'usuarios',
+        canActivate: [roleGuard], // <-- PATOVICA DE ROL
+        data: { roles: ['ADMIN'] }, // <-- SOLO ADMIN
+        loadChildren: () =>
+          import('./features/usuarios/usuarios.routes').then((m) => m.usuariosRoutes),
+      },
     ],
   },
-
-  // Si tuvieras un Login, va AFUERA del MainLayout para que no se vea la barra lateral
-  // { path: 'login', loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent) }
 ];

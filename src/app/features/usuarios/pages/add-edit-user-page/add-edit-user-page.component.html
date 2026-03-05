@@ -1,0 +1,103 @@
+<div class="p-6 md:p-10 bg-base-200 min-h-screen">
+  <div class="max-w-2xl mx-auto">
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-3xl font-bold text-base-content">
+        {{ usuarioId ? 'Editar Dirigente' : 'Nuevo Dirigente' }}
+      </h1>
+      <button routerLink="/usuarios" class="btn btn-ghost">Volver</button>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        @if (errorMsg()) {
+          <div class="alert alert-error mb-4">
+            <span>{{ errorMsg() }}</span>
+          </div>
+        }
+
+        @if (cargando()) {
+          <div class="flex justify-center p-8">
+            <span class="loading loading-spinner loading-lg text-primary"></span>
+          </div>
+        } @else {
+          <form [formGroup]="usuarioForm" (ngSubmit)="guardar()" class="flex flex-col gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text font-bold">Nombre</span></div>
+                <input
+                  type="text"
+                  formControlName="nombre"
+                  class="input input-bordered w-full focus:input-primary"
+                />
+              </label>
+
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text font-bold">Apellido</span></div>
+                <input
+                  type="text"
+                  formControlName="apellido"
+                  class="input input-bordered w-full focus:input-primary"
+                />
+              </label>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text font-bold">DNI</span></div>
+                <input
+                  type="text"
+                  formControlName="dni"
+                  class="input input-bordered w-full focus:input-primary"
+                />
+              </label>
+
+              <label class="form-control w-full">
+                <div class="label"><span class="label-text font-bold">Rama / Rol</span></div>
+                <select
+                  formControlName="rol"
+                  class="select select-bordered w-full focus:select-primary"
+                >
+                  <option value="MANADA">🐺 Manada</option>
+                  <option value="UNIDAD">⚜️ Unidad</option>
+                  <option value="CAMINANTES">🧭 Caminantes</option>
+                  <option value="ROVERS">🔥 Rovers</option>
+                  <option value="ADMIN">⚙️ Administrador</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="form-control w-full">
+              <div class="label"><span class="label-text font-bold">Correo Electrónico</span></div>
+              <input
+                type="email"
+                formControlName="email"
+                class="input input-bordered w-full focus:input-primary"
+              />
+              @if (!usuarioId) {
+                <div class="label">
+                  <span class="label-text-alt text-info"
+                    >Se le enviará una contraseña temporal a este correo.</span
+                  >
+                </div>
+              }
+            </label>
+
+            <button
+              type="submit"
+              class="btn btn-primary mt-6 w-full"
+              [disabled]="usuarioForm.invalid || guardando()"
+            >
+              {{
+                guardando()
+                  ? 'Guardando...'
+                  : usuarioId
+                    ? 'Actualizar Datos'
+                    : 'Registrar y Enviar Mail'
+              }}
+            </button>
+          </form>
+        }
+      </div>
+    </div>
+  </div>
+</div>
