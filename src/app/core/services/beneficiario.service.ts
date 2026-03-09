@@ -47,4 +47,8 @@ export class BeneficiarioService {
   deleteBeneficiario(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`).pipe(tap(() => this.limpiarCache()));
   }
+
+  getPorFamilia(idFamilia: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/familia/${idFamilia}`);
+  }
 }

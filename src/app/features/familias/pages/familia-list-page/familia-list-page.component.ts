@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FamiliaService } from '../../../../core/services/familia.service';
@@ -8,6 +8,7 @@ import { TablaFamiliasComponent } from '../../components/familias-table/familias
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner.component/loading-spinner.component';
 import { AlertErrorComponent } from '../../../../shared/components/alert-error/alert-error.component';
 import { ConfirmModalComponent } from '../../../../shared/components/confirm-modal/confirm-modal.component';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-familia-list',
@@ -24,14 +25,38 @@ import { ConfirmModalComponent } from '../../../../shared/components/confirm-mod
 })
 export class FamiliaListComponent implements OnInit {
   private familiaService = inject(FamiliaService);
+  private authService = inject(AuthService);
 
   public familias = signal<Familia[]>([]);
+  public searchTerm = signal<string>('');
   public familiaSeleccionada = signal<Familia | null>(null);
   public cargando = signal<boolean>(false);
   public errorMsg = signal<string | null>(null);
 
+  public isAdmin = computed(() => this.authService.usuarioActual()?.rol === 'ADMIN');
+
+  public familiasFiltradas = computed(() => {
+    const lista = this.familias();
+    const busca = this.searchTerm().toLowerCase().trim();
+
+    if (!busca) return lista;
+
+    return lista.filter(
+      (f) =>
+        f.apellido_familia?.toLowerCase().includes(busca) ||
+        f.nombre_padre?.toLowerCase().includes(busca) ||
+        f.nombre_madre?.toLowerCase().includes(busca) ||
+        f.email?.toLowerCase().includes(busca),
+    );
+  });
+
   ngOnInit() {
     this.cargarFamilias();
+  }
+
+  onSearch(event: Event) {
+    const val = (event.target as HTMLInputElement).value;
+    this.searchTerm.set(val);
   }
 
   cargarFamilias(forzarRecarga: boolean = false) {

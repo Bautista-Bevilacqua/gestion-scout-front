@@ -1,0 +1,40 @@
+<dialog id="modal_confirmar_pago" class="modal">
+  <div class="modal-box border-t-4 border-success">
+    <h3 class="font-bold text-2xl mb-4 text-center">Registrar Pago</h3>
+
+    @if (cargo()) {
+      <div class="bg-base-200 p-4 rounded-lg mb-6 text-center">
+        <p class="text-sm opacity-70">Estás cobrando:</p>
+        <p class="text-xl font-bold">{{ cargo()?.concepto_nombre }}</p>
+        <p class="text-3xl font-black text-success mt-2">${{ cargo()?.monto_final }}</p>
+      </div>
+
+      <p class="font-bold mb-3">Seleccioná el método de pago:</p>
+
+      <div class="grid grid-cols-2 gap-4">
+        <button
+          class="btn btn-outline btn-lg flex flex-col h-auto py-4 gap-2"
+          [disabled]="procesando()"
+          (click)="confirmar('EFECTIVO')"
+        >
+          <span class="text-2xl">💵</span>
+          <span>Efectivo</span>
+        </button>
+
+        <button
+          class="btn btn-outline btn-info btn-lg flex flex-col h-auto py-4 gap-2"
+          [disabled]="procesando()"
+          (click)="confirmar('MERCADOPAGO')"
+        >
+          <span class="text-2xl">📱</span>
+          <span>Mercado Pago</span>
+        </button>
+      </div>
+    }
+
+    <div class="modal-action">
+      <button class="btn btn-ghost" (click)="cerrar()" [disabled]="procesando()">Cancelar</button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button (click)="cerrar()">close</button></form>
+</dialog>

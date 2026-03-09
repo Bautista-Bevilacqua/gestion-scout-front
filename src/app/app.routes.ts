@@ -44,6 +44,13 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/usuarios/usuarios.routes').then((m) => m.usuariosRoutes),
       },
+      {
+        path: 'tesoreria',
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
+        loadChildren: () =>
+          import('./features/tesoreria/tesoreria.routes').then((m) => m.tesoreriaRoutes),
+      },
     ],
   },
 ];

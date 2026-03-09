@@ -1,0 +1,55 @@
+<dialog id="modal_generar_cuotas" class="modal">
+  <div class="modal-box max-w-2xl">
+    <h3 class="font-bold text-2xl mb-4">Generador Masivo de Cuotas</h3>
+
+    <form
+      [formGroup]="cuotasForm"
+      (ngSubmit)="guardar()"
+      class="grid grid-cols-1 md:grid-cols-2 gap-6"
+    >
+      <div class="md:col-span-2">
+        <label class="label font-bold">Meses a generar:</label>
+        <div class="grid grid-cols-3 sm:grid-cols-4 gap-2 bg-base-200 p-4 rounded-xl">
+          @for (mes of listaMeses; track mes) {
+            <label
+              class="flex items-center gap-2 cursor-pointer hover:bg-base-300 p-1 rounded transition-colors"
+            >
+              <input
+                type="checkbox"
+                class="checkbox checkbox-sm checkbox-primary"
+                (change)="onMesChange(mes, $event)"
+              />
+              <span class="text-sm">{{ mes }}</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <label class="form-control">
+        <div class="label"><span class="label-text font-bold">Año</span></div>
+        <input type="number" formControlName="anio" class="input input-bordered" />
+      </label>
+
+      <label class="form-control">
+        <div class="label"><span class="label-text font-bold">Monto ($)</span></div>
+        <input
+          type="number"
+          formControlName="monto_base"
+          class="input input-bordered"
+          placeholder="Ej: 5000"
+        />
+      </label>
+
+      <div class="md:col-span-2 modal-action">
+        <button type="button" class="btn" (click)="cerrar()">Cancelar</button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="cuotasForm.invalid || guardando()"
+        >
+          {{ guardando() ? 'Generando...' : 'Crear todas las cuotas' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>

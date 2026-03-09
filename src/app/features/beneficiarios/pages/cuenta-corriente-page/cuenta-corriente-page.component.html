@@ -1,0 +1,189 @@
+<div class="p-6 md:p-10 bg-base-200 min-h-screen">
+  <div class="flex justify-between items-start mb-8">
+    <div>
+      <div class="text-sm breadcrumbs mb-2">
+        <ul>
+          <li><a routerLink="/beneficiarios">Beneficiarios</a></li>
+          <li>Cuenta Corriente</li>
+        </ul>
+      </div>
+      <h1 class="text-4xl font-black text-base-content">
+        {{ beneficiario()?.nombre }} {{ beneficiario()?.apellido }}
+      </h1>
+      <p class="text-base-content/60 text-lg">Historial contable y gestión de cobros</p>
+    </div>
+
+    <div class="stats shadow bg-base-100 border-t-4 border-error">
+      <div class="stat">
+        <div class="stat-title">Deuda Histórica</div>
+        <div class="stat-value text-error">${{ deudaTotal() }}</div>
+        <div class="stat-desc">Pendiente acumulado</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="flex flex-col gap-6">
+      <div class="card bg-base-100 shadow-xl border-t-4 border-primary">
+        <div class="card-body">
+          <h2 class="card-title text-xl mb-4 text-primary">Anotar Deuda Nueva</h2>
+          <p class="text-sm text-base-content/70 mb-4">
+            Asignar un concepto de cobro de su rama que aún no deba.
+          </p>
+
+          <div class="form-control w-full">
+            <select
+              class="select select-bordered w-full"
+              (change)="onSelectChange($event)"
+              [disabled]="conceptosDisponibles().length === 0"
+            >
+              <option value="" disabled selected>
+                {{
+                  conceptosDisponibles().length > 0
+                    ? 'Seleccionar concepto...'
+                    : 'No hay conceptos nuevos'
+                }}
+              </option>
+              @for (con of conceptosDisponibles(); track con.id_concepto) {
+                <option [value]="con.id_concepto">{{ con.nombre }} (${{ con.monto_base }})</option>
+              }
+            </select>
+          </div>
+
+          <button
+            class="btn btn-primary mt-4 w-full"
+            [disabled]="!conceptoSeleccionadoId() || guardando()"
+            (click)="asignarConceptoManual()"
+          >
+            @if (guardando()) {
+              <span class="loading loading-spinner"></span> Asignando...
+            } @else {
+              Asignar al beneficiario
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-2 flex flex-col gap-8 relative">
+      <div class="card bg-base-100 shadow-xl overflow-hidden">
+        <div class="card-body p-0">
+          <div class="p-6 pb-0 flex justify-between items-center">
+            <h2 class="card-title text-error text-2xl">Deudas Pendientes</h2>
+            @if (seleccionados().size > 0) {
+              <div class="badge badge-primary gap-2 p-3 font-bold">
+                {{ seleccionados().size }} ítems marcados
+              </div>
+            }
+          </div>
+
+          <div class="overflow-x-auto mt-4">
+            <table class="table table-zebra w-full">
+              <thead class="bg-base-300 text-base-content uppercase text-xs">
+                <tr>
+                  <th class="w-12 text-center">Cobrar</th>
+                  <th>Concepto</th>
+                  <th>Vencimiento</th>
+                  <th>Monto</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of cargos(); track c.id_cargo) {
+                  @if (c.estado === 'PENDIENTE') {
+                    <tr class="hover group">
+                      <td class="text-center">
+                        <input
+                          type="checkbox"
+                          class="checkbox checkbox-primary"
+                          [checked]="seleccionados().has(c.id_cargo)"
+                          (change)="toggleSeleccion(c.id_cargo)"
+                        />
+                      </td>
+                      <td>
+                        <div class="flex flex-col">
+                          <span class="font-bold">{{ c.concepto_nombre }}</span>
+                          <button
+                            class="text-xs text-primary font-bold text-left opacity-0 group-hover:opacity-100 transition-opacity"
+                            (click)="prepararCobro(c)"
+                          >
+                            Solo este pago
+                          </button>
+                        </div>
+                      </td>
+                      <td>{{ c.fecha_vencimiento | date: 'dd/MM/yyyy' }}</td>
+                      <td class="text-lg font-mono font-bold">${{ c.monto_final }}</td>
+                    </tr>
+                  }
+                } @empty {
+                  <tr>
+                    <td colspan="4" class="text-center py-12 opacity-50 text-xl italic font-medium">
+                      ¡No tiene deudas! El chico está al día. 🏕️
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        @if (seleccionados().size > 0) {
+          <div
+            class="bg-primary text-primary-content p-6 flex justify-between items-center shadow-inner animate-in slide-in-from-bottom duration-300"
+          >
+            <div>
+              <p class="text-xs uppercase font-bold opacity-70">Total Seleccionado</p>
+              <p class="text-4xl font-black">${{ totalSeleccionado() }}</p>
+            </div>
+            <button
+              class="btn btn-secondary btn-lg shadow-xl px-8"
+              (click)="prepararCobroMultiple()"
+            >
+              💰 Registrar Cobro
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body p-0">
+          <div class="p-6 pb-0">
+            <h2 class="card-title text-success text-2xl">Historial de Pagos</h2>
+          </div>
+          <div class="overflow-x-auto mt-4">
+            <table class="table table-sm w-full">
+              <thead class="bg-base-200 uppercase text-xs">
+                <tr>
+                  <th>Fecha</th>
+                  <th>Concepto</th>
+                  <th>Monto</th>
+                  <th>Cobrador</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of cargos(); track c.id_cargo) {
+                  @if (c.estado === 'PAGADO') {
+                    <tr class="hover opacity-80">
+                      <td>{{ c.fecha_pago | date: 'dd/MM/yyyy' }}</td>
+                      <td class="font-medium">{{ c.concepto_nombre }}</td>
+                      <td class="font-bold">${{ c.monto_final }}</td>
+                      <td class="text-xs italic">
+                        {{ c.cobrador_nombre }} {{ c.cobrador_apellido }}
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-confirmar-pago-modal
+  [cargo]="cargoAAsignar()"
+  [procesando]="procesandoPago()"
+  (onConfirmar)="ejecutarPago($event)"
+  (onCerrar)="cerrarModalCobro()"
+></app-confirmar-pago-modal>

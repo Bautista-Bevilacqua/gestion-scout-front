@@ -3,8 +3,34 @@
     <h1 class="text-3xl font-bold text-base-content">Nómina de Familias</h1>
     <div class="flex gap-2">
       <button class="btn btn-ghost" (click)="cargarFamilias(true)">↻ Refrescar</button>
-      <button routerLink="/familias/nueva" class="btn btn-primary">Nueva Familia</button>
+      @if (isAdmin()) {
+        <button routerLink="/familias/nueva" class="btn btn-primary">Nueva Familia</button>
+      }
     </div>
+  </div>
+
+  <div class="mb-6 flex flex-col gap-2">
+    <div class="relative w-full md:w-96">
+      <div
+        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-xl opacity-50"
+      >
+        🔍
+      </div>
+      <input
+        type="text"
+        placeholder="Buscar por apellido, padres o email..."
+        class="input input-bordered w-full pl-10 bg-base-100 shadow-sm"
+        [value]="searchTerm()"
+        (input)="onSearch($event)"
+      />
+    </div>
+    @if (searchTerm()) {
+      <div class="animate-in fade-in slide-in-from-left-2 duration-200">
+        <span class="badge badge-ghost gap-2 italic text-xs">
+          Resultados encontrados: <strong>{{ familiasFiltradas().length }}</strong>
+        </span>
+      </div>
+    }
   </div>
 
   @if (cargando()) {
@@ -17,7 +43,7 @@
       </button>
     </div>
   } @else {
-    <app-tabla-familias [familias]="familias()" (onEliminar)="prepararBorrado($event)">
+    <app-tabla-familias [familias]="familiasFiltradas()" (onEliminar)="prepararBorrado($event)">
     </app-tabla-familias>
   }
 

@@ -107,6 +107,27 @@
         </li>
       }
 
+      @if (usuarioActual()?.rol === 'ADMIN') {
+        <li>
+          <details open>
+            <summary class="text-lg font-bold py-4 text-base-content/80 hover:bg-base-200">
+              💰 Tesorería
+            </summary>
+            <ul class="mt-2 ml-4 border-l-2 border-base-300 flex flex-col gap-2">
+              <li>
+                <a
+                  routerLink="/tesoreria/conceptos"
+                  routerLinkActive="active font-bold shadow-sm"
+                  class="text-base py-3 px-4 hover:translate-x-1 transition-transform"
+                >
+                  📋 Conceptos de Cobro
+                </a>
+              </li>
+            </ul>
+          </details>
+        </li>
+      }
+
       <li>
         <details open>
           <summary class="text-lg font-bold py-4 text-base-content/80 hover:bg-base-200">

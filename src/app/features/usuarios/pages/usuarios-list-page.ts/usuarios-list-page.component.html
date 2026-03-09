@@ -4,11 +4,34 @@
 
     <div class="flex gap-2">
       <button class="btn btn-ghost" (click)="cargarUsuarios(true)">↻ Refrescar</button>
-
-      @if (authService.usuarioActual()?.rol === 'ADMIN') {
+      @if (isAdmin()) {
         <button routerLink="/usuarios/nuevo" class="btn btn-primary">Nuevo Dirigente</button>
       }
     </div>
+  </div>
+
+  <div class="mb-6 flex flex-col gap-2">
+    <div class="relative w-full md:w-96">
+      <div
+        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-xl opacity-50"
+      >
+        🔍
+      </div>
+      <input
+        type="text"
+        placeholder="Buscar por apellido, email o rol..."
+        class="input input-bordered w-full pl-10 bg-base-100 shadow-sm"
+        [value]="searchTerm()"
+        (input)="onSearch($event)"
+      />
+    </div>
+    @if (searchTerm()) {
+      <div class="animate-in fade-in slide-in-from-left-2 duration-200">
+        <span class="badge badge-ghost gap-2 italic text-xs">
+          Resultados encontrados: <strong>{{ usuariosFiltrados().length }}</strong>
+        </span>
+      </div>
+    }
   </div>
 
   @if (cargando()) {
@@ -22,12 +45,13 @@
     </div>
   } @else {
     <app-users-table
-      [usuarios]="usuarios()"
-      [esAdmin]="authService.usuarioActual()?.rol === 'ADMIN'"
+      [usuarios]="usuariosFiltrados()"
+      [esAdmin]="isAdmin()"
       (onEliminar)="prepararBorrado($event)"
     >
     </app-users-table>
   }
+
   <app-confirm-modal
     modalId="modal_borrar_usuario"
     titulo="¿Confirmar eliminación?"

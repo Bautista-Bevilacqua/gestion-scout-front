@@ -1,0 +1,78 @@
+<div class="p-6 md:p-10 bg-base-200 min-h-screen">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div>
+      <div class="text-sm breadcrumbs mb-2">
+        <ul>
+          <li><a routerLink="/familias">Familias</a></li>
+          <li>Cuenta Familiar</li>
+        </ul>
+      </div>
+      <h1 class="text-4xl font-black text-base-content">
+        Familia <span class="text-primary">{{ nombreFamilia() }}</span>
+      </h1>
+      <p class="text-lg opacity-70">Gestión unificada de cobros para el grupo familiar.</p>
+    </div>
+
+    <div
+      class="stats shadow bg-base-100 border-t-4"
+      [class.border-error]="totalFamiliar() > 0"
+      [class.border-success]="totalFamiliar() === 0"
+    >
+      <div class="stat">
+        <div class="stat-title uppercase font-bold text-xs">Deuda Total de la Familia</div>
+        <div class="stat-value text-3xl" [class.text-error]="totalFamiliar() > 0">
+          ${{ totalFamiliar() }}
+        </div>
+        <div class="stat-desc">{{ hijos().length }} integrantes registrados</div>
+      </div>
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <div class="flex justify-center py-20">
+      <span class="loading loading-dots loading-lg text-primary"></span>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (hijo of hijos(); track hijo.id_beneficiario) {
+        <div
+          class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all border-b-4"
+          [class.border-error]="hijo.deuda_total > 0"
+          [class.border-success]="hijo.deuda_total == 0"
+        >
+          <div class="card-body items-center text-center">
+            <div
+              class="badge badge-outline mb-2 font-bold"
+              [ngClass]="getRamaClass(hijo.rama_actual)"
+            >
+              {{ hijo.rama_actual }}
+            </div>
+            <h2 class="card-title text-2xl font-bold">{{ hijo.nombre }}</h2>
+
+            <div class="divider my-1"></div>
+
+            <div class="flex flex-col items-center">
+              <span class="text-xs uppercase opacity-50 font-bold">Situación</span>
+              <span
+                class="text-2xl font-black"
+                [class.text-error]="hijo.deuda_total > 0"
+                [class.text-success]="hijo.deuda_total == 0"
+              >
+                ${{ hijo.deuda_total }}
+              </span>
+            </div>
+
+            <div class="card-actions w-full mt-6">
+              <button
+                [routerLink]="['/beneficiarios', hijo.id_beneficiario, 'cuenta']"
+                class="btn btn-primary btn-block"
+              >
+                Gestionar Pagos 💵
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

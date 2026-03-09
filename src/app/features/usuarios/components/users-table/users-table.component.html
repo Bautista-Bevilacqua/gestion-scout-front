@@ -2,24 +2,48 @@
   <table class="table table-zebra w-full">
     <thead class="bg-base-300 text-base-content text-sm">
       <tr>
-        <th>Nombre Completo</th>
-        <th>DNI</th>
-        <th>Email</th>
-        <th>Rol / Rama</th>
-        @if (esAdmin) {
+        <th (click)="cambiarOrden('apellido')" class="cursor-pointer hover:bg-base-200 select-none">
+          <div class="flex items-center gap-1">
+            Nombre Completo
+            <span>{{
+              sortField() === 'apellido' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕'
+            }}</span>
+          </div>
+        </th>
+        <th (click)="cambiarOrden('dni')" class="cursor-pointer hover:bg-base-200 select-none">
+          <div class="flex items-center gap-1">
+            DNI
+            <span>{{ sortField() === 'dni' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕' }}</span>
+          </div>
+        </th>
+        <th (click)="cambiarOrden('email')" class="cursor-pointer hover:bg-base-200 select-none">
+          <div class="flex items-center gap-1">
+            Email
+            <span>{{
+              sortField() === 'email' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕'
+            }}</span>
+          </div>
+        </th>
+        <th (click)="cambiarOrden('rol')" class="cursor-pointer hover:bg-base-200 select-none">
+          <div class="flex items-center gap-1">
+            Rol / Rama
+            <span>{{ sortField() === 'rol' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕' }}</span>
+          </div>
+        </th>
+        @if (esAdmin()) {
           <th class="text-center">Acciones</th>
         }
       </tr>
     </thead>
     <tbody>
-      @for (u of usuarios; track u.id_usuario) {
+      @for (u of usuariosOrdenados(); track u.id_usuario) {
         <tr class="hover">
           <td class="font-medium">{{ u.apellido }}, {{ u.nombre }}</td>
           <td>{{ u.dni }}</td>
           <td>{{ u.email }}</td>
           <td>
             <div
-              class="badge badge-outline"
+              class="badge badge-outline font-bold"
               [class.badge-primary]="u.rol === 'ADMIN'"
               [class.badge-warning]="u.rol === 'MANADA'"
               [class.badge-success]="u.rol === 'UNIDAD'"
@@ -30,7 +54,7 @@
             </div>
           </td>
 
-          @if (esAdmin) {
+          @if (esAdmin()) {
             <td class="text-center">
               <div class="flex justify-center gap-2">
                 <button
@@ -48,8 +72,11 @@
         </tr>
       } @empty {
         <tr>
-          <td [attr.colspan]="esAdmin ? 5 : 4" class="text-center py-8 text-base-content/50">
-            No hay dirigentes registrados en el sistema.
+          <td
+            [attr.colspan]="esAdmin() ? 5 : 4"
+            class="text-center py-8 text-base-content/50 italic"
+          >
+            No hay dirigentes que coincidan con la búsqueda.
           </td>
         </tr>
       }

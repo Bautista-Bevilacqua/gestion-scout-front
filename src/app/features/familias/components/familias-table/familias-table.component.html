@@ -1,18 +1,37 @@
 <div class="card bg-base-100 shadow-xl overflow-x-auto">
   <table class="table table-zebra w-full">
-    <thead class="bg-base-300 text-base-content">
+    <thead class="bg-base-300 text-base-content text-sm">
       <tr>
-        <th>Apellido Familia</th>
+        <th
+          (click)="cambiarOrden('apellido_familia')"
+          class="cursor-pointer hover:bg-base-200 select-none"
+        >
+          <div class="flex items-center gap-1">
+            Apellido Familia
+            <span>{{
+              sortField() === 'apellido_familia' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕'
+            }}</span>
+          </div>
+        </th>
         <th>Padres</th>
         <th>Contactos</th>
-        <th>Email</th>
-        <th class="text-center">Acciones</th>
+        <th (click)="cambiarOrden('email')" class="cursor-pointer hover:bg-base-200 select-none">
+          <div class="flex items-center gap-1">
+            Email
+            <span>{{
+              sortField() === 'email' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕'
+            }}</span>
+          </div>
+        </th>
+        @if (isAdmin()) {
+          <th class="text-center">Acciones</th>
+        }
       </tr>
     </thead>
     <tbody>
-      @for (f of familias; track f.id_familia) {
+      @for (f of familiasOrdenadas(); track f.id_familia) {
         <tr class="hover">
-          <td class="font-bold">{{ f.apellido_familia }}</td>
+          <td class="font-bold text-lg">{{ f.apellido_familia }}</td>
           <td>
             <div class="text-sm">👨 {{ f.nombre_padre || '-' }}</div>
             <div class="text-sm">👩 {{ f.nombre_madre || '-' }}</div>
@@ -24,28 +43,38 @@
             </div>
           </td>
           <td>
-            <div class="flex items-center gap-2 text-sm opacity-80 italic">
-              {{ f.email || 'Sin correo' }}
-            </div>
+            <span class="opacity-70 italic text-sm">{{ f.email || 'Sin correo' }}</span>
           </td>
-          <td class="text-center">
-            <div class="flex justify-center gap-2">
-              <button
-                [routerLink]="['/familias/editar', f.id_familia]"
-                class="btn btn-sm btn-outline btn-primary"
-              >
-                Editar
-              </button>
-              <button class="btn btn-sm btn-outline btn-error" (click)="eliminar(f)">
-                Eliminar
-              </button>
-            </div>
-          </td>
+
+          @if (isAdmin()) {
+            <td class="text-center">
+              <div class="flex justify-center gap-2">
+                <button
+                  [routerLink]="['/familias', f.id_familia, 'cuenta']"
+                  class="btn btn-sm btn-outline btn-success"
+                >
+                  💰 Cuenta
+                </button>
+                <button
+                  [routerLink]="['/familias/editar', f.id_familia]"
+                  class="btn btn-sm btn-outline btn-primary"
+                >
+                  Editar
+                </button>
+                <button class="btn btn-sm btn-outline btn-error" (click)="eliminar(f)">
+                  Eliminar
+                </button>
+              </div>
+            </td>
+          }
         </tr>
       } @empty {
         <tr>
-          <td colspan="5" class="text-center py-8 text-base-content/50">
-            No hay familias registradas.
+          <td
+            [attr.colspan]="isAdmin() ? 5 : 4"
+            class="text-center py-8 text-base-content/50 italic"
+          >
+            No hay familias que coincidan con la búsqueda.
           </td>
         </tr>
       }

@@ -6,6 +6,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/confirm-mod
 import { AlertErrorComponent } from '../../../../shared/components/alert-error/alert-error.component';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner.component/loading-spinner.component';
 import { BeneficiariosTableComponent } from '../../components/beneficiarios-table.component/beneficiarios-table.component';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-beneficiario-list',
@@ -21,7 +22,12 @@ import { BeneficiariosTableComponent } from '../../components/beneficiarios-tabl
 })
 export class BeneficiarioListComponent implements OnInit {
   private beneficiarioService = inject(BeneficiarioService);
+  private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
+
+  public isAdmin = computed(() => this.authService.usuarioActual()?.rol === 'ADMIN');
+
+  public searchTerm = signal<string>('');
 
   public beneficiarios = signal<Beneficiario[]>([]);
   public beneficiarioSeleccionado = signal<any>(null);
@@ -32,9 +38,25 @@ export class BeneficiarioListComponent implements OnInit {
   public beneficiariosFiltrados = computed(() => {
     const listaCompleta = this.beneficiarios();
     const rama = this.ramaSeleccionada();
-    if (!rama) return listaCompleta;
-    return listaCompleta.filter((b) => b.rama_actual?.toLowerCase() === rama.toLowerCase());
+    const busqueda = this.searchTerm().toLowerCase().trim();
+
+    return listaCompleta.filter((b) => {
+      const cumpleRama = !rama || b.rama_actual?.toLowerCase() === rama.toLowerCase();
+      const cumpleBusqueda =
+        !busqueda ||
+        b.nombre.toLowerCase().includes(busqueda) ||
+        b.apellido.toLowerCase().includes(busqueda) ||
+        b.dni.toString().includes(busqueda) ||
+        b.rama_actual?.toLowerCase().includes(busqueda);
+
+      return cumpleRama && cumpleBusqueda;
+    });
   });
+
+  onSearch(event: Event) {
+    const element = event.target as HTMLInputElement;
+    this.searchTerm.set(element.value);
+  }
 
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {

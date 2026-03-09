@@ -1,0 +1,180 @@
+<div class="p-6 md:p-10 bg-base-200 min-h-screen">
+  <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-base-content">Tesorería: Conceptos de Cobro</h1>
+      <p class="text-base-content/60">Gestioná las cuotas, campamentos y actividades a cobrar.</p>
+    </div>
+    <div class="flex gap-2">
+      <button class="btn btn-ghost" (click)="cargarConceptos(true)">↻ Refrescar</button>
+      <button class="btn btn-outline btn-primary" (click)="modalCuotas.abrir()">
+        📅 Generar Cuotas
+      </button>
+      <button class="btn btn-primary" (click)="abrirModal()">+ Nuevo Concepto</button>
+    </div>
+  </div>
+
+  @if (errorMsg()) {
+    <app-alert-error [mensaje]="errorMsg()" (cerrar)="errorMsg.set(null)"></app-alert-error>
+  }
+
+  @if (exitoMsg()) {
+    <app-alert-success [mensaje]="exitoMsg()" (cerrar)="exitoMsg.set(null)"></app-alert-success>
+  }
+
+  @if (cargando()) {
+    <app-loading-spinner texto="Cargando conceptos..."></app-loading-spinner>
+  } @else {
+    <div class="card bg-base-100 shadow-xl overflow-x-auto">
+      <table class="table table-zebra w-full">
+        <thead class="bg-base-300 text-base-content text-sm">
+          <tr>
+            <th>Concepto</th>
+            <th>Monto Base</th>
+            <th>Alcance</th>
+            <th>Vencimiento</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of conceptos(); track c.id_concepto) {
+            <tr class="hover">
+              <td class="font-bold">{{ c.nombre }}</td>
+              <td class="text-success font-medium">${{ c.monto_base }}</td>
+              <td>
+                <div
+                  class="badge badge-outline"
+                  [class.badge-primary]="c.alcance === 'GRUPO'"
+                  [class.badge-warning]="c.alcance === 'MANADA'"
+                  [class.badge-success]="c.alcance === 'UNIDAD'"
+                  [class.badge-info]="c.alcance === 'CAMINANTES'"
+                  [class.badge-error]="c.alcance === 'ROVERS'"
+                >
+                  {{ c.alcance }}
+                </div>
+              </td>
+              <td>
+                {{ c.fecha_vencimiento ? (c.fecha_vencimiento | date: 'dd/MM/yyyy') : 'Sin vto.' }}
+              </td>
+              <td class="text-center">
+                <div class="flex justify-center gap-2">
+                  <button
+                    class="btn btn-sm btn-outline btn-success"
+                    (click)="prepararAsignacion(c)"
+                    title="Generar deudas a beneficiarios"
+                  >
+                    💵 Asignar
+                  </button>
+                  <button class="btn btn-sm btn-ghost text-error" (click)="prepararBorrado(c)">
+                    Eliminar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="text-center py-8 text-base-content/50">
+                No hay conceptos de cobro registrados.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<dialog id="modal_nuevo_concepto" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-xl mb-6">Crear Nuevo Concepto</h3>
+
+    <form [formGroup]="conceptoForm" (ngSubmit)="guardar()" class="flex flex-col gap-4">
+      <label class="form-control w-full">
+        <div class="label"><span class="label-text font-bold">Nombre del Concepto</span></div>
+        <input
+          type="text"
+          formControlName="nombre"
+          class="input input-bordered w-full"
+          placeholder="Ej: Cuota Junio 2024"
+        />
+      </label>
+
+      <div class="grid grid-cols-2 gap-4">
+        <label class="form-control w-full">
+          <div class="label"><span class="label-text font-bold">Monto Base ($)</span></div>
+          <input
+            type="number"
+            formControlName="monto_base"
+            class="input input-bordered w-full"
+            placeholder="Ej: 5000"
+          />
+        </label>
+
+        <label class="form-control w-full">
+          <div class="label"><span class="label-text font-bold">Alcance</span></div>
+          <select formControlName="alcance" class="select select-bordered w-full">
+            <option value="GRUPO">Todo el Grupo</option>
+            <option value="MANADA">Manada</option>
+            <option value="UNIDAD">Unidad</option>
+            <option value="CAMINANTES">Caminantes</option>
+            <option value="ROVERS">Rovers</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text font-bold">Fecha de Vencimiento</span>
+          <span class="label-text-alt text-base-content/60">(Opcional)</span>
+        </div>
+        <input
+          type="date"
+          formControlName="fecha_vencimiento"
+          class="input input-bordered w-full"
+        />
+      </label>
+
+      <div class="modal-action mt-6">
+        <button type="button" class="btn" (click)="cerrarModal()">Cancelar</button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="conceptoForm.invalid || guardando()"
+        >
+          {{ guardando() ? 'Guardando...' : 'Crear Concepto' }}
+        </button>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+
+<app-confirm-modal
+  modalId="modal_borrar_concepto"
+  titulo="¿Confirmar eliminación?"
+  [mensaje]="
+    'Estás por borrar el concepto de cobro <strong>' +
+    (conceptoSeleccionado()?.nombre || '') +
+    '</strong>.<br><br>Solo podrás eliminarlo si aún no se le ha generado esta deuda a ningún beneficiario.'
+  "
+  textoBoton="Eliminar"
+  (confirmar)="confirmarBorrado()"
+>
+</app-confirm-modal>
+
+<app-confirm-modal
+  modalId="modal_asignar_concepto"
+  titulo="¿Generar deudas masivas?"
+  [mensaje]="
+    'Estás por asignarle la deuda <strong>' +
+    (conceptoSeleccionado()?.nombre || '') +
+    '</strong> a todos los beneficiarios correspondientes al alcance: <span class=\'badge badge-neutral\'>' +
+    (conceptoSeleccionado()?.alcance || '') +
+    '</span>.<br><br>¿Estás seguro de continuar?'
+  "
+  textoBoton="Sí, generar deudas"
+  (confirmar)="confirmarAsignacion()"
+>
+</app-confirm-modal>
+
+<app-generar-cuotas-modal #modalCuotas (onFinalizado)="cargarConceptos(true)">
+</app-generar-cuotas-modal>

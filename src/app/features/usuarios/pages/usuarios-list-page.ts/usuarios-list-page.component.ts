@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UsuarioService } from '../../../../core/services/usuario.service';
@@ -28,11 +28,34 @@ export class UsuarioListPageComponent implements OnInit {
 
   public usuarios = signal<Usuario[]>([]);
   public cargando = signal<boolean>(false);
+  public searchTerm = signal<string>('');
   public error = signal<string | null>(null);
   public usuarioSeleccionado = signal<Usuario | null>(null);
 
+  public isAdmin = computed(() => this.authService.usuarioActual()?.rol === 'ADMIN');
+
+  public usuariosFiltrados = computed(() => {
+    const lista = this.usuarios();
+    const busca = this.searchTerm().toLowerCase().trim();
+    if (!busca) return lista;
+
+    return lista.filter(
+      (u) =>
+        u.nombre.toLowerCase().includes(busca) ||
+        u.apellido.toLowerCase().includes(busca) ||
+        u.dni.toString().includes(busca) ||
+        u.email.toLowerCase().includes(busca) ||
+        u.rol.toLowerCase().includes(busca),
+    );
+  });
+
   ngOnInit() {
     this.cargarUsuarios();
+  }
+
+  onSearch(event: Event) {
+    const val = (event.target as HTMLInputElement).value;
+    this.searchTerm.set(val);
   }
 
   cargarUsuarios(forzarRecarga: boolean = false) {

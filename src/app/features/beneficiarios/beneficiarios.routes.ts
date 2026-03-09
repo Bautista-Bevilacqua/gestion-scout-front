@@ -38,4 +38,11 @@ export const beneficiariosRoutes: Routes = [
         (m) => m.BeneficiarioFormComponent,
       ),
   },
+  {
+    path: ':id/cuenta',
+    loadComponent: () =>
+      import('./pages/cuenta-corriente-page/cuenta-corriente-page.component').then(
+        (m) => m.CuentaCorrientePageComponent,
+      ),
+  },
 ];
