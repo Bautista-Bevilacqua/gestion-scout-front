@@ -6,6 +6,6 @@
     "outDir": "./out-tsc/app",
     "types": []
   },
-  "include": ["src/**/*.ts", "src/app/features/tesoreria/conceptos/pages/conceptos-page"],
+  "include": ["src/**/*.ts", "src/app/features/tesoreria/conceptos/pages/conceptos-page", "src/app/features/tesoreria/caja/components/caja-table"],
   "exclude": ["src/**/*.spec.ts"]
 }

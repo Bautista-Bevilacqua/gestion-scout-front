@@ -1,0 +1,90 @@
+<div class="card bg-base-100 shadow-xl overflow-x-auto border-t-4 border-neutral">
+  <table class="table table-zebra w-full">
+    <thead class="bg-base-300 text-base-content text-sm">
+      <tr>
+        <th (click)="cambiarOrden('fecha')" class="cursor-pointer hover:bg-base-200 select-none">
+          Fecha
+          <span>{{ sortField() === 'fecha' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕' }}</span>
+        </th>
+        <th (click)="cambiarOrden('tipo')" class="cursor-pointer hover:bg-base-200 select-none">
+          Tipo
+          <span>{{ sortField() === 'tipo' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕' }}</span>
+        </th>
+        <th (click)="cambiarOrden('concepto')" class="cursor-pointer hover:bg-base-200 select-none">
+          Concepto
+          <span>{{
+            sortField() === 'concepto' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕'
+          }}</span>
+        </th>
+        <th
+          (click)="cambiarOrden('monto')"
+          class="cursor-pointer hover:bg-base-200 select-none text-right"
+        >
+          Monto
+          <span>{{ sortField() === 'monto' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕' }}</span>
+        </th>
+        <th>Responsable</th>
+        <th class="text-center">Comprobante</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (m of movimientosOrdenados(); track m.id_movimiento) {
+        <tr class="hover">
+          <td class="font-medium whitespace-nowrap">{{ m.fecha | date: 'dd MMM yyyy, HH:mm' }}</td>
+
+          <td>
+            <div
+              class="badge font-bold"
+              [class.badge-success]="m.tipo === 'INGRESO'"
+              [class.badge-error]="m.tipo === 'EGRESO'"
+            >
+              {{ m.tipo }}
+            </div>
+          </td>
+
+          <td>
+            <span class="font-bold">{{ m.concepto }}</span>
+            @if (m.id_pago) {
+              <span class="badge badge-ghost badge-xs ml-2">Automático</span>
+            }
+          </td>
+
+          <td
+            class="text-right font-black text-lg"
+            [class.text-success]="m.tipo === 'INGRESO'"
+            [class.text-error]="m.tipo === 'EGRESO'"
+          >
+            {{ m.tipo === 'INGRESO' ? '+' : '-' }}${{ m.monto }}
+          </td>
+
+          <td class="text-sm">
+            <div class="opacity-70 text-xs">
+              💻 Sist: {{ m.usuario_nombre || 'Automático' }} {{ m.usuario_apellido || '' }}
+            </div>
+
+            @if (m.persona_involucrada) {
+              <div class="font-bold mt-1">
+                {{ m.tipo === 'EGRESO' ? '👉 Entregado a:' : '👈 Recibido de:' }}
+                {{ m.persona_involucrada }}
+              </div>
+            }
+          </td>
+
+          <td class="text-center">
+            @if (m.comprobante) {
+              <div class="badge badge-outline text-xs" title="{{ m.comprobante }}">📄 Ver</div>
+            } @else {
+              <span class="opacity-30">-</span>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="6" class="text-center py-10 text-base-content/50 italic">
+            No hay movimientos registrados en estas fechas.
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

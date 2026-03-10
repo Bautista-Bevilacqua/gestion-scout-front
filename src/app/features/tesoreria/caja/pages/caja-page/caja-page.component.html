@@ -1,0 +1,122 @@
+<div class="p-6 md:p-10 bg-base-200 min-h-screen relative">
+  <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+    <div>
+      <h1 class="text-3xl font-black text-base-content">Caja del Grupo</h1>
+      <p class="opacity-70">Control de ingresos, egresos y balance general.</p>
+    </div>
+
+    <div class="flex gap-2">
+      <button class="btn btn-ghost" (click)="cargarCaja()">↻ Refrescar</button>
+      <button class="btn btn-primary" (click)="modalNuevo.abrir()">+ Nuevo Movimiento</button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="stat bg-base-100 shadow-xl rounded-2xl border-b-4 border-success">
+      <div class="stat-figure text-success text-4xl">📈</div>
+      <div class="stat-title font-bold uppercase text-xs">Total Ingresos</div>
+      <div class="stat-value text-success">${{ totalIngresos() }}</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-xl rounded-2xl border-b-4 border-error">
+      <div class="stat-figure text-error text-4xl">📉</div>
+      <div class="stat-title font-bold uppercase text-xs">Total Egresos</div>
+      <div class="stat-value text-error">${{ totalEgresos() }}</div>
+    </div>
+
+    <div
+      class="stat bg-base-100 shadow-xl rounded-2xl border-b-4"
+      [class.border-success]="balanceTotal() >= 0"
+      [class.border-error]="balanceTotal() < 0"
+    >
+      <div
+        class="stat-figure text-4xl"
+        [class.text-success]="balanceTotal() >= 0"
+        [class.text-error]="balanceTotal() < 0"
+      >
+        💰
+      </div>
+      <div class="stat-title font-bold uppercase text-xs">Balance Actual</div>
+      <div
+        class="stat-value"
+        [class.text-success]="balanceTotal() >= 0"
+        [class.text-error]="balanceTotal() < 0"
+      >
+        ${{ balanceTotal() }}
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="bg-base-100 p-5 rounded-2xl shadow-md mb-6 flex flex-col xl:flex-row items-end justify-between gap-6"
+  >
+    <div class="w-full xl:w-auto flex flex-col gap-2">
+      <span class="label-text font-bold text-sm opacity-70 uppercase tracking-wider">
+        Filtros Rápidos
+      </span>
+      <div class="flex flex-wrap gap-2">
+        <button
+          class="btn border-none bg-info/20 hover:bg-info hover:text-info-content transition-all"
+          (click)="filtrarHoy()"
+        >
+          Hoy
+        </button>
+        <button
+          class="btn border-none bg-primary/20 hover:bg-primary hover:text-info-content transition-all"
+          (click)="filtrarEsteMes()"
+        >
+          Este Mes
+        </button>
+        <button
+          class="btn border-none bg-secondary/20 hover:bg-secondary hover:text-info-content transition-all"
+          (click)="filtrarEsteAnio()"
+        >
+          Este Año
+        </button>
+      </div>
+    </div>
+
+    <div class="hidden xl:block divider divider-horizontal m-0"></div>
+
+    <div class="flex flex-col md:flex-row items-end gap-3 w-full xl:w-auto">
+      <div class="form-control w-full md:w-auto">
+        <label class="label py-1"><span class="label-text font-bold text-sm">Desde</span></label>
+        <input
+          type="date"
+          class="input input-bordered w-full"
+          [ngModel]="fechaDesde()"
+          (ngModelChange)="fechaDesde.set($event)"
+        />
+      </div>
+
+      <div class="form-control w-full md:w-auto">
+        <label class="label py-1"><span class="label-text font-bold text-sm">Hasta</span></label>
+        <input
+          type="date"
+          class="input input-bordered w-full"
+          [ngModel]="fechaHasta()"
+          (ngModelChange)="fechaHasta.set($event)"
+        />
+      </div>
+
+      <div class="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
+        <button class="btn btn-neutral flex-1 md:flex-none" (click)="aplicarFiltros()">
+          Filtrar
+        </button>
+        <button class="btn btn-outline flex-1 md:flex-none" (click)="limpiarFiltros()">
+          Limpiar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <div class="flex justify-center py-10">
+      <span class="loading loading-dots loading-lg text-primary"></span>
+    </div>
+  } @else {
+    <app-caja-table [movimientos]="movimientos()"></app-caja-table>
+  }
+</div>
+
+<app-nuevo-movimiento-modal #modalNuevo (onGuardado)="cargarCaja()"> </app-nuevo-movimiento-modal>

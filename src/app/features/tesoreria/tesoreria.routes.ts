@@ -8,6 +8,11 @@ export const tesoreriaRoutes: Routes = [
         (m) => m.ConceptosPageComponent,
       ),
   },
+  {
+    path: 'caja',
+    loadComponent: () =>
+      import('./caja/pages/caja-page/caja-page.component').then((m) => m.CajaPageComponent),
+  },
   // Si alguien entra a /tesoreria pelado, lo mandamos a conceptos por defecto
   {
     path: '',

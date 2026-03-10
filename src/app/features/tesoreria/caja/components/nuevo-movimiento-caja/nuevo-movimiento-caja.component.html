@@ -1,0 +1,112 @@
+<dialog #modalDialog class="modal modal-bottom sm:modal-middle">
+  <div class="modal-box">
+    <h3 class="font-bold text-2xl mb-6 text-base-content border-b pb-2">Registrar Movimiento</h3>
+
+    <div class="form-control w-full mb-4">
+      <label class="label"
+        ><span class="label-text font-bold">¿Qué tipo de movimiento es?</span></label
+      >
+      <div class="join w-full">
+        <input
+          class="join-item btn flex-1"
+          type="radio"
+          name="tipo_mov"
+          aria-label="🔴 Egreso (Gasto)"
+          [checked]="nuevoMovimiento().tipo === 'EGRESO'"
+          (change)="actualizarCampo('tipo', 'EGRESO')"
+        />
+        <input
+          class="join-item btn flex-1"
+          type="radio"
+          name="tipo_mov"
+          aria-label="🟢 Ingreso (Plata)"
+          [checked]="nuevoMovimiento().tipo === 'INGRESO'"
+          (change)="actualizarCampo('tipo', 'INGRESO')"
+        />
+      </div>
+    </div>
+
+    <div class="form-control w-full mb-4">
+      <label class="label"><span class="label-text font-bold">Monto ($)</span></label>
+      <div class="relative">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-lg font-bold opacity-50"
+          >$</span
+        >
+        <input
+          type="number"
+          min="1"
+          class="input input-bordered w-full pl-8 font-bold text-lg"
+          placeholder="Ej: 15000"
+          [ngModel]="nuevoMovimiento().monto"
+          (ngModelChange)="actualizarCampo('monto', $event)"
+        />
+      </div>
+    </div>
+
+    <div class="form-control w-full mb-4">
+      <label class="label"><span class="label-text font-bold">Concepto / Detalle</span></label>
+      <input
+        type="text"
+        class="input input-bordered w-full"
+        placeholder="Ej: Compra de fibrones y cartulinas"
+        [ngModel]="nuevoMovimiento().concepto"
+        (ngModelChange)="actualizarCampo('concepto', $event)"
+      />
+    </div>
+
+    <div class="form-control w-full mb-4">
+      <label class="label">
+        <span class="label-text font-bold text-primary">
+          {{
+            nuevoMovimiento().tipo === 'EGRESO'
+              ? '💸 ¿A quién se le entregó el dinero?'
+              : '🤝 ¿De quién se recibió?'
+          }}
+        </span>
+      </label>
+      <input
+        type="text"
+        class="input input-bordered w-full"
+        [placeholder]="
+          nuevoMovimiento().tipo === 'EGRESO'
+            ? 'Ej: Baloo, Kaa, Chofer del micro...'
+            : 'Ej: Familia García, Donación Anónima...'
+        "
+        [ngModel]="nuevoMovimiento().persona_involucrada"
+        (ngModelChange)="actualizarCampo('persona_involucrada', $event)"
+      />
+    </div>
+
+    <div class="form-control w-full mb-6">
+      <label class="label">
+        <span class="label-text font-bold">Comprobante (Opcional)</span>
+        <span class="label-text-alt opacity-70">Nº Factura o Ticket</span>
+      </label>
+      <input
+        type="text"
+        class="input input-bordered w-full"
+        placeholder="Ej: FC-0001-456"
+        [ngModel]="nuevoMovimiento().comprobante"
+        (ngModelChange)="actualizarCampo('comprobante', $event)"
+      />
+    </div>
+
+    <div class="modal-action">
+      <button class="btn btn-ghost" [disabled]="guardando()" (click)="cerrar()">Cancelar</button>
+
+      <button
+        class="btn btn-primary"
+        [disabled]="!nuevoMovimiento().monto || !nuevoMovimiento().concepto || guardando()"
+        (click)="guardar()"
+      >
+        @if (guardando()) {
+          <span class="loading loading-spinner"></span> Guardando...
+        } @else {
+          💾 Guardar en Caja
+        }
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" (click)="cerrar()"></div>
+</dialog>
