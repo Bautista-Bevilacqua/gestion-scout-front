@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './shared/layout/main-layout/main-layout.component';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { HomePageComponent } from './features/home/pages/home-page.component/home-page.component';
 
 export const routes: Routes = [
   {
@@ -21,8 +22,7 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'beneficiarios', pathMatch: 'full' },
-
+      { path: '', component: HomePageComponent },
       {
         path: 'beneficiarios',
         loadChildren: () =>

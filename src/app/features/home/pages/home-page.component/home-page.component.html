@@ -1,0 +1,101 @@
+<div class="p-6 md:p-10 bg-base-200 min-h-screen">
+  <div class="mb-10">
+    <h1 class="text-4xl font-black text-base-content mb-2">¡Hola, {{ nombreUsuario() }}! 👋</h1>
+    <p class="text-lg opacity-70">
+      Bienvenido al panel de control del Grupo 108. Acá tenés un resumen de hoy.
+    </p>
+  </div>
+
+  @if (cargando()) {
+    <div class="flex justify-center py-20">
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+  } @else {
+    <div class="stats stats-vertical lg:stats-horizontal shadow-xl w-full mb-10 bg-base-100">
+      <div class="stat">
+        <div class="stat-figure text-primary text-4xl">⚜️</div>
+        <div class="stat-title font-bold">Beneficiarios Activos</div>
+        <div class="stat-value text-primary">{{ totalBeneficiarios() }}</div>
+        <div class="stat-desc">Chicos registrados en el sistema</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-figure text-secondary text-4xl">👨‍👩‍👧‍👦</div>
+        <div class="stat-title font-bold">Familias</div>
+        <div class="stat-value text-secondary">{{ totalFamilias() }}</div>
+        <div class="stat-desc">Grupos familiares vinculados</div>
+      </div>
+
+      @if (isAdmin()) {
+        <div class="stat">
+          <div class="stat-figure text-success text-4xl">💰</div>
+          <div class="stat-title font-bold">Balance de Caja</div>
+          <div
+            class="stat-value"
+            [class.text-success]="balanceCaja() >= 0"
+            [class.text-error]="balanceCaja() < 0"
+          >
+            ${{ balanceCaja() }}
+          </div>
+          <div class="stat-desc">Plata disponible en el grupo</div>
+        </div>
+      }
+    </div>
+
+    <h2 class="text-2xl font-bold mb-6 text-base-content border-b border-base-300 pb-2">
+      ⚡ Accesos Rápidos
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      @if (isAdmin()) {
+        <a
+          routerLink="/beneficiarios/nuevo"
+          class="card bg-base-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer border border-base-300"
+        >
+          <div class="card-body items-center text-center p-6">
+            <div class="text-4xl mb-2">📝</div>
+            <h3 class="card-title text-lg">Inscribir Chico</h3>
+            <p class="text-xs opacity-60">Cargar un nuevo beneficiario</p>
+          </div>
+        </a>
+      }
+
+      <a
+        routerLink="/beneficiarios"
+        class="card bg-base-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer border border-base-300"
+      >
+        <div class="card-body items-center text-center p-6">
+          <div class="text-4xl mb-2">🏕️</div>
+          <h3 class="card-title text-lg">Nóminas</h3>
+          <p class="text-xs opacity-60">Ver listas por ramas</p>
+        </div>
+      </a>
+
+      @if (isAdmin()) {
+        <a
+          routerLink="/tesoreria/caja"
+          class="card bg-base-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer border border-base-300"
+        >
+          <div class="card-body items-center text-center p-6">
+            <div class="text-4xl mb-2">💵</div>
+            <h3 class="card-title text-lg">Libro Mayor</h3>
+            <p class="text-xs opacity-60">Registrar gastos o ingresos</p>
+          </div>
+        </a>
+      }
+
+      @if (isAdmin()) {
+        <a
+          routerLink="/usuarios"
+          class="card bg-base-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer border border-base-300"
+        >
+          <div class="card-body items-center text-center p-6">
+            <div class="text-4xl mb-2">👥</div>
+            <h3 class="card-title text-lg">Dirigentes</h3>
+            <p class="text-xs opacity-60">Gestionar accesos y roles</p>
+          </div>
+        </a>
+      }
+    </div>
+  }
+</div>

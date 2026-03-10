@@ -2,7 +2,7 @@
   <input id="main-drawer" type="checkbox" class="drawer-toggle" />
 
   <div class="drawer-content flex flex-col bg-base-200 min-h-screen">
-    <div class="w-full navbar bg-base-100 shadow-sm">
+    <div class="w-full navbar bg-base-100 shadow-sm px-4">
       <div class="flex-none lg:hidden">
         <label for="main-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
           <svg
@@ -20,7 +20,11 @@
           </svg>
         </label>
       </div>
-      <div class="flex-1 px-2 mx-2 font-bold text-xl">Sistema Scout</div>
+
+      <div class="flex-1 px-2 mx-2">
+        <a class="btn btn-ghost text-xl font-black uppercase">Sistema Scout</a>
+      </div>
+
       <div class="flex-none gap-2">
         <label class="swap swap-rotate btn btn-ghost btn-circle" title="Cambiar tema">
           <input
@@ -49,27 +53,29 @@
             />
           </svg>
         </label>
+
         <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-ghost flex gap-2">
+          <div
+            tabindex="0"
+            role="button"
+            class="btn btn-ghost rounded-full px-2 pr-4 flex items-center gap-3"
+          >
             <div class="avatar placeholder">
               <div class="bg-primary text-primary-content rounded-full w-8">
-                <span class="text-xs">{{ iniciales() }}</span>
+                <span class="text-xs font-bold">{{ iniciales() }}</span>
               </div>
             </div>
-
-            <span class="hidden md:inline">{{ nombreCompleto() }}</span>
+            <span class="text-sm font-bold text-base-content">{{ nombreCompleto() }}</span>
           </div>
 
           <ul
             tabindex="0"
-            class="mt-3 z-1 p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+            class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52 font-medium"
           >
             <li class="menu-title px-4 py-2">
               <span class="text-xs opacity-50 uppercase">Rol: {{ usuarioActual()?.rol }}</span>
             </li>
-
             <li><a>Mi Perfil</a></li>
-
             <li><a class="text-error" (click)="cerrarSesion()">Cerrar Sesión</a></li>
           </ul>
         </div>
@@ -85,7 +91,7 @@
     <label for="main-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
 
     <ul class="menu p-4 w-72 min-h-full bg-base-100 text-base-content border-r border-base-200">
-      <li class="menu-title px-4 mb-6 mt-2">
+      <li routerLink="/" class="menu-title px-4 mb-6 mt-2">
         <h2 class="text-3xl font-black text-base-content flex gap-1 items-baseline">
           Grupo
           <span class="flex tracking-wider ml-1">
@@ -93,6 +99,17 @@
             ><span class="text-red-700">8</span>
           </span>
         </h2>
+      </li>
+
+      <li class="mb-2">
+        <a
+          routerLink="/"
+          routerLinkActive="bg-base-200 font-bold"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="text-lg font-bold py-4 text-base-content/80 hover:bg-base-200"
+        >
+          🏠 Inicio
+        </a>
       </li>
 
       @if (usuarioActual()?.rol === 'ADMIN') {
