@@ -45,4 +45,9 @@ export const beneficiariosRoutes: Routes = [
         (m) => m.CuentaCorrientePageComponent,
       ),
   },
+  {
+    path: ':id/legajo',
+    loadComponent: () =>
+      import('./pages/legajo-page/legajo-page.component').then((m) => m.LegajoPageComponent),
+  },
 ];

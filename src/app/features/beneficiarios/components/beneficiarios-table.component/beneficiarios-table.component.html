@@ -30,6 +30,8 @@
           </div>
         </th>
 
+        <th class="text-center">Legajo</th>
+
         @if (isAdmin()) {
           <th class="text-center">Acciones</th>
         }
@@ -50,6 +52,14 @@
             >
               {{ b.rama_actual }}
             </div>
+          </td>
+          <td class="text-center">
+            <a
+              [routerLink]="['/beneficiarios', b.id_beneficiario, 'legajo']"
+              class="btn btn-sm btn-outline btn-info"
+            >
+              📂 Ver Docs
+            </a>
           </td>
           @if (isAdmin()) {
             <td class="text-center">

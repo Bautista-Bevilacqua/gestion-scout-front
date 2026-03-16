@@ -1,0 +1,99 @@
+<div class="p-6 md:p-10 bg-base-200 min-h-screen">
+  <div class="mb-6">
+    <a routerLink="/beneficiarios" class="btn btn-ghost btn-sm">← Volver a la nómina</a>
+  </div>
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-black text-base-content flex items-center gap-3">
+      Legajo de
+      <span class="text-secondary">{{ beneficiario().nombre }} {{ beneficiario().apellido }}</span>
+    </h1>
+    <p class="opacity-70 mt-2">Documentación respaldatoria (DNI, Fichas Médicas, Autorizaciones)</p>
+  </div>
+
+  <div class="bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300 mb-10">
+    <h2 class="text-lg font-bold mb-4">Añadir nuevo documento</h2>
+
+    <div class="flex flex-col md:flex-row gap-4 items-end">
+      <div class="form-control w-full md:w-auto flex-1">
+        <label class="label"
+          ><span class="label-text font-medium">Seleccionar archivo (PDF o Imagen)</span></label
+        >
+        <input
+          type="file"
+          class="file-input file-input-bordered file-input-primary w-full"
+          accept=".pdf, image/*"
+          (change)="onFileSelected($event)"
+        />
+      </div>
+
+      <button
+        class="btn btn-primary"
+        [disabled]="!archivoSeleccionado || subiendo()"
+        (click)="subirArchivo()"
+      >
+        @if (subiendo()) {
+          <span class="loading loading-spinner"></span> Subiendo...
+        } @else {
+          📤 Subir al Legajo
+        }
+      </button>
+    </div>
+  </div>
+
+  <h2 class="text-xl font-bold mb-4 text-base-content border-b border-base-300 pb-2">
+    Documentos Guardados
+  </h2>
+
+  @if (cargando()) {
+    <div class="flex justify-center py-10">
+      <span class="loading loading-dots loading-lg text-primary"></span>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      @for (doc of documentos(); track doc.id_documento) {
+        <div
+          class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow"
+        >
+          <div class="card-body p-4 flex flex-row items-center gap-3">
+            <div class="text-4xl">{{ getIcono(doc.tipo_archivo) }}</div>
+
+            <div class="flex-1 overflow-hidden">
+              <h3 class="font-bold text-sm truncate" [title]="doc.nombre_original">
+                {{ doc.nombre_original }}
+              </h3>
+              <p class="text-xs opacity-60">{{ doc.fecha_subida | date: 'dd MMM yyyy' }}</p>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <a
+                [href]="urlBackend + '/uploads/' + doc.nombre_archivo"
+                target="_blank"
+                class="btn btn-xs btn-ghost btn-circle text-info"
+                title="Ver / Descargar"
+              >
+                👁️
+              </a>
+              <button
+                class="btn btn-xs btn-ghost btn-circle text-error"
+                (click)="eliminarDoc(doc.id_documento)"
+                title="Eliminar"
+              >
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div
+          class="col-span-full text-center py-12 opacity-50 bg-base-100 rounded-xl border border-dashed border-base-300"
+        >
+          <div class="text-5xl mb-3">📂</div>
+          <p class="font-medium italic">
+            Este beneficiario todavía no tiene documentos en su legajo.
+          </p>
+        </div>
+      }
+    </div>
+  }
+</div>
