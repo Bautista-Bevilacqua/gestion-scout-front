@@ -1,0 +1,139 @@
+<ul class="menu p-4 w-72 min-h-full bg-base-100 text-base-content border-r border-base-200">
+  <li class="menu-title px-4 mb-6 mt-2">
+    <h2
+      class="text-3xl font-black text-base-content flex gap-1 items-baseline cursor-pointer"
+      routerLink="/"
+    >
+      Grupo
+      <span class="flex tracking-wider ml-1">
+        <span class="text-red-700">1</span><span class="text-green-500">0</span
+        ><span class="text-red-700">8</span>
+      </span>
+    </h2>
+  </li>
+
+  <li class="mb-2">
+    <a
+      routerLink="/"
+      routerLinkActive="bg-base-200 font-bold"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="text-lg font-bold py-4 text-base-content/80 hover:bg-base-200"
+    >
+      🏠 Inicio
+    </a>
+  </li>
+
+  @if (usuarioActual()?.rol === 'ADMIN') {
+    <li>
+      <details>
+        <summary class="text-lg font-bold py-4 text-base-content/80 hover:bg-base-200">
+          ⚙️ Administración
+        </summary>
+        <ul class="mt-2 ml-4 border-l-2 border-base-300 flex flex-col gap-2">
+          <li>
+            <a
+              routerLink="/beneficiarios"
+              routerLinkActive="active font-bold shadow-sm"
+              class="text-base py-3 px-4 hover:translate-x-1 transition-transform"
+              >⚜️ Beneficiarios</a
+            >
+          </li>
+          <li>
+            <a
+              routerLink="/familias"
+              routerLinkActive="active font-bold shadow-sm"
+              class="text-base py-3 px-4 hover:translate-x-1 transition-transform"
+              >👨‍👩‍👧‍👦 Familias</a
+            >
+          </li>
+          <li>
+            <a
+              routerLink="/usuarios"
+              routerLinkActive="active font-bold shadow-sm"
+              class="text-base py-3 px-4 hover:translate-x-1 transition-transform"
+              >👥 Dirigentes</a
+            >
+          </li>
+        </ul>
+      </details>
+    </li>
+  }
+
+  @if (usuarioActual()?.rol === 'ADMIN') {
+    <li>
+      <details>
+        <summary class="text-lg font-bold py-4 text-base-content/80 hover:bg-base-200">
+          💰 Tesorería
+        </summary>
+        <ul class="mt-2 ml-4 border-l-2 border-base-300 flex flex-col gap-2">
+          <li>
+            <a
+              routerLink="/tesoreria/conceptos"
+              routerLinkActive="active font-bold shadow-sm"
+              class="text-base py-3 px-4 hover:translate-x-1 transition-transform"
+              >📋 Conceptos de Cobro</a
+            >
+          </li>
+          <li>
+            <a
+              routerLink="/tesoreria/caja"
+              routerLinkActive="active font-bold shadow-sm"
+              class="text-base py-3 px-4 hover:translate-x-1 transition-transform"
+              >🏦 Caja</a
+            >
+          </li>
+        </ul>
+      </details>
+    </li>
+  }
+
+  <li>
+    <details>
+      <summary class="text-lg font-bold py-4 text-base-content/80 hover:bg-base-200">
+        🏕️ Ramas
+      </summary>
+      <ul class="mt-2 ml-4 border-l-2 border-base-300 flex flex-col gap-2">
+        @if (usuarioActual()?.rol === 'ADMIN' || usuarioActual()?.rol === 'MANADA') {
+          <li>
+            <a
+              routerLink="/beneficiarios/rama/Manada"
+              routerLinkActive="active font-bold shadow-sm text-warning"
+              class="text-base py-3 px-4 hover:translate-x-1 transition-transform"
+              >🐺 Manada</a
+            >
+          </li>
+        }
+        @if (usuarioActual()?.rol === 'ADMIN' || usuarioActual()?.rol === 'UNIDAD') {
+          <li>
+            <a
+              routerLink="/beneficiarios/rama/Unidad"
+              routerLinkActive="active font-bold shadow-sm text-success"
+              class="text-base py-3 px-4 hover:translate-x-1 transition-transform"
+              >⚜️ Unidad</a
+            >
+          </li>
+        }
+        @if (usuarioActual()?.rol === 'ADMIN' || usuarioActual()?.rol === 'CAMINANTES') {
+          <li>
+            <a
+              routerLink="/beneficiarios/rama/Caminantes"
+              routerLinkActive="active font-bold shadow-sm text-info"
+              class="text-base py-3 px-4 hover:translate-x-1 transition-transform"
+              >🧭 Caminantes</a
+            >
+          </li>
+        }
+        @if (usuarioActual()?.rol === 'ADMIN' || usuarioActual()?.rol === 'ROVERS') {
+          <li>
+            <a
+              routerLink="/beneficiarios/rama/Rovers"
+              routerLinkActive="active font-bold shadow-sm text-error"
+              class="text-base py-3 px-4 hover:translate-x-1 transition-transform"
+              >🔥 Rovers</a
+            >
+          </li>
+        }
+      </ul>
+    </details>
+  </li>
+</ul>
