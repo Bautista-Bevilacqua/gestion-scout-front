@@ -2,13 +2,14 @@ import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, tap } from 'rxjs';
 import { ConceptoCobro } from '../../models/concepto-cobro.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ConceptoService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api/conceptos';
+  private apiUrl = `${environment.apiUrl}/conceptos`;
 
   private cacheConceptos = signal<ConceptoCobro[] | null>(null);
 

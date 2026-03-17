@@ -2,13 +2,14 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, tap } from 'rxjs';
 import { Familia } from '../../models/familia.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FamiliaService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api/familias';
+  private apiUrl = `${environment.apiUrl}/familias`;
 
   private cacheFamilias = signal<Familia[] | null>(null);
 

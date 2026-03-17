@@ -2,6 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, map, Observable, of, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export type RolUsuario = 'ADMIN' | 'MANADA' | 'UNIDAD' | 'CAMINANTES' | 'ROVERS';
 
@@ -20,7 +21,7 @@ export interface UsuarioLogueado {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private apiUrl = 'http://localhost:3000/api/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   public usuarioActual = signal<UsuarioLogueado | null>(null);
 
@@ -28,17 +29,15 @@ export class AuthService {
     this.cargarSesionGuardada();
   }
 
-  // Ahora devuelve un Observable porque es una petición asíncrona
   login(email: string, password: string): Observable<boolean> {
     return this.http.post<any>(`${this.apiUrl}/login`, { email, password }).pipe(
       tap((res) => {
-        // Armamos el objeto combinando los datos del usuario y el token que mandó Node
         const usuarioConToken: UsuarioLogueado = { ...res.usuario, token: res.token };
         this.usuarioActual.set(usuarioConToken);
         localStorage.setItem('scout_session', JSON.stringify(usuarioConToken));
       }),
-      map(() => true), // Si salió bien, devolvemos true
-      catchError(() => of(false)), // Si el backend tiró error (ej: 401), devolvemos false
+      map(() => true),
+      catchError(() => of(false)),
     );
   }
 
@@ -58,7 +57,6 @@ export class AuthService {
   cambiarPassword(nuevaPassword: string): Observable<boolean> {
     return this.http.post<any>(`${this.apiUrl}/cambiar-password`, { nuevaPassword }).pipe(
       tap(() => {
-        // Si salió bien, actualizamos la señal para sacarle la marca y lo guardamos en el localStorage
         const user = this.usuarioActual();
         if (user) {
           const userActualizado = { ...user, debe_cambiar_password: false };

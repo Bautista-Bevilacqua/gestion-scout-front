@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { DocumentoLegajo } from '../../models/legajo.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LegajoService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api/legajos';
+  private apiUrl = `${environment.apiUrl}/legajos`;
 
   getDocumentos(idBeneficiario: number): Observable<DocumentoLegajo[]> {
     return this.http.get<DocumentoLegajo[]>(`${this.apiUrl}/${idBeneficiario}`);

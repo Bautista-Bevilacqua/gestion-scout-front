@@ -2,13 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { MovimientoCaja } from '../../models/caja.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CajaService {
-  private apiUrl = 'http://localhost:3000/api/caja';
-
+  private apiUrl = `${environment.apiUrl}/caja`;
   private http = inject(HttpClient);
 
   getMovimientos(fechaDesde?: string, fechaHasta?: string): Observable<MovimientoCaja[]> {
