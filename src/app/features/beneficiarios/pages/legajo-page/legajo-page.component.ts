@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { LegajoService } from '../../../../core/services/legajo.service';
 import { DocumentoLegajo } from '../../../../models/legajo.model';
 import { BeneficiarioService } from '../../../../core/services/beneficiario.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-legajo-page',
@@ -23,7 +24,7 @@ export class LegajoPageComponent implements OnInit {
   public subiendo = signal(false);
   public archivoSeleccionado: File | null = null;
 
-  public urlBackend = 'http://localhost:3000';
+  public urlBackend = environment.apiUrl;
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
