@@ -49,7 +49,7 @@ export class LoginComponent {
         if (exito) {
           const user = this.authService.usuarioActual();
           if (user?.debe_cambiar_password) {
-            this.router.navigate(['/cambiar-password']);
+            this.router.navigate(['/change-password']);
           } else {
             this.router.navigate(['/']);
           }

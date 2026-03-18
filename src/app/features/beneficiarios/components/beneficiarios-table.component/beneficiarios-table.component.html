@@ -1,17 +1,27 @@
-<div class="card bg-base-100 shadow-xl overflow-x-auto">
-  <table class="table table-zebra w-full">
-    <thead class="bg-base-300 text-base-content text-sm">
+<div class="flex justify-end gap-2 p-4 border-b border-base-200">
+  <button class="btn btn-sm btn-success text-white" (click)="descargarExcel()">
+    📊 Exportar Excel
+  </button>
+  <button class="btn btn-sm btn-error text-white" (click)="descargarPDF()">📄 Exportar PDF</button>
+</div>
+
+<div class="card bg-base-100 shadow-xl overflow-x-auto w-full">
+  <table class="table table-zebra table-sm md:table-md w-full">
+    <thead class="bg-base-300 text-base-content text-xs md:text-sm">
       <tr>
         <th (click)="cambiarOrden('apellido')" class="cursor-pointer hover:bg-base-200 select-none">
           <div class="flex items-center gap-1">
-            Nombre Completo
+            Nombre <span class="hidden md:inline">Completo</span>
             <span>{{
               sortField() === 'apellido' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕'
             }}</span>
           </div>
         </th>
 
-        <th (click)="cambiarOrden('dni')" class="cursor-pointer hover:bg-base-200 select-none">
+        <th
+          (click)="cambiarOrden('dni')"
+          class="hidden md:table-cell cursor-pointer hover:bg-base-200 select-none"
+        >
           <div class="flex items-center gap-1">
             DNI
             <span>{{ sortField() === 'dni' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕' }}</span>
@@ -23,7 +33,7 @@
           class="cursor-pointer hover:bg-base-200 select-none"
         >
           <div class="flex items-center gap-1">
-            Rama Actual
+            Rama
             <span>{{
               sortField() === 'rama_actual' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕'
             }}</span>
@@ -37,14 +47,20 @@
         }
       </tr>
     </thead>
+
     <tbody>
       @for (b of beneficiariosOrdenados(); track b.id_beneficiario) {
         <tr class="hover">
-          <td class="font-medium">{{ b.apellido }}, {{ b.nombre }}</td>
-          <td>{{ b.dni }}</td>
+          <td class="whitespace-nowrap">
+            <div class="font-bold text-xs md:text-sm">{{ b.apellido }}, {{ b.nombre }}</div>
+            <div class="text-[10px] opacity-60 md:hidden font-mono mt-0.5">DNI: {{ b.dni }}</div>
+          </td>
+
+          <td class="hidden md:table-cell text-sm">{{ b.dni }}</td>
+
           <td>
             <div
-              class="badge badge-outline font-bold"
+              class="badge badge-sm md:badge-md badge-outline font-bold"
               [class.badge-warning]="b.rama_actual === 'Manada'"
               [class.badge-success]="b.rama_actual === 'Unidad'"
               [class.badge-info]="b.rama_actual === 'Caminantes'"
@@ -53,31 +69,43 @@
               {{ b.rama_actual }}
             </div>
           </td>
-          <td class="text-center">
+
+          <td class="text-center px-1 md:px-4">
             <a
               [routerLink]="['/beneficiarios', b.id_beneficiario, 'legajo']"
-              class="btn btn-sm btn-outline btn-info"
+              class="btn btn-xs md:btn-sm btn-square md:w-auto md:px-3 btn-outline btn-info"
+              title="Ver Legajo"
             >
-              📂 Ver Docs
+              <span>📂</span>
+              <span class="hidden lg:inline ml-1">Docs</span>
             </a>
           </td>
+
           @if (isAdmin()) {
-            <td class="text-center">
-              <div class="flex justify-center gap-2">
+            <td class="text-center px-1 md:px-4">
+              <div class="flex justify-center gap-1">
                 <button
                   [routerLink]="['/beneficiarios', b.id_beneficiario, 'cuenta']"
-                  class="btn btn-sm btn-outline btn-success"
+                  class="btn btn-xs md:btn-sm btn-square md:w-auto md:px-3 btn-outline btn-success"
+                  title="Cuenta Corriente"
                 >
-                  💵 Cuenta
+                  <span>💵</span><span class="hidden lg:inline ml-1">Cuenta</span>
                 </button>
+
                 <button
                   [routerLink]="['/beneficiarios/editar', b.id_beneficiario]"
-                  class="btn btn-sm btn-outline btn-primary"
+                  class="btn btn-xs md:btn-sm btn-square md:w-auto md:px-3 btn-outline btn-primary"
+                  title="Editar"
                 >
-                  Editar
+                  <span>✏️</span><span class="hidden lg:inline ml-1">Editar</span>
                 </button>
-                <button class="btn btn-sm btn-outline btn-error" (click)="eliminar(b)">
-                  Eliminar
+
+                <button
+                  class="btn btn-xs md:btn-sm btn-square md:w-auto md:px-3 btn-outline btn-error"
+                  (click)="eliminar(b)"
+                  title="Eliminar"
+                >
+                  <span>🗑️</span><span class="hidden lg:inline ml-1">Eliminar</span>
                 </button>
               </div>
             </td>
@@ -86,7 +114,7 @@
       } @empty {
         <tr>
           <td
-            [attr.colspan]="isAdmin() ? 4 : 3"
+            [attr.colspan]="isAdmin() ? 5 : 4"
             class="text-center py-8 text-base-content/50 italic"
           >
             No hay beneficiarios registrados en el sistema.

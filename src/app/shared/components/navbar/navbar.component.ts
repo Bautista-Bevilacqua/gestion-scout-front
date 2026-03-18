@@ -20,6 +20,14 @@ export class NavbarComponent {
     return user ? `${user.nombre} ${user.apellido}` : 'Usuario Invitado';
   });
 
+  inicialNombre(): string {
+    const user = this.usuarioActual();
+    if (user && user.nombre) {
+      return user.nombre.charAt(0).toUpperCase();
+    }
+    return 'U'; // 'U' de Usuario por defecto
+  }
+
   public iniciales = computed(() => {
     const user = this.usuarioActual();
     return user ? `${user.nombre.charAt(0)}${user.apellido.charAt(0)}`.toUpperCase() : '??';
