@@ -1,6 +1,7 @@
-import { Component, computed, signal, input } from '@angular/core';
+import { Component, computed, signal, input, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MovimientoCaja } from '../../../../../models/caja.model';
+import { ExportService } from '../../../../../core/services/export.service';
 
 @Component({
   selector: 'app-caja-table',
@@ -10,6 +11,9 @@ import { MovimientoCaja } from '../../../../../models/caja.model';
   templateUrl: './caja-table.component.html',
 })
 export class CajaTableComponent {
+  private exportService = inject(ExportService);
+  private datePipe = inject(DatePipe);
+
   movimientos = input.required<MovimientoCaja[]>();
 
   public sortField = signal<keyof MovimientoCaja>('fecha');
@@ -53,5 +57,52 @@ export class CajaTableComponent {
       this.sortField.set(field);
       this.sortDirection.set('asc');
     }
+  }
+
+  descargarExcel() {
+    const datosParaExcel = this.movimientosOrdenados().map((m) => {
+      // Juntamos la data del responsable en un solo texto legible
+      const responsable = m.persona_involucrada
+        ? `${m.persona_involucrada} (Sist: ${m.usuario_nombre || 'Auto'})`
+        : `Sist: ${m.usuario_nombre || 'Automático'}`;
+
+      return {
+        Fecha: this.datePipe.transform(m.fecha, 'dd/MM/yyyy HH:mm') || m.fecha,
+        Tipo: m.tipo,
+        Concepto: m.concepto,
+        Responsable: responsable,
+        Comprobante: m.comprobante ? 'Sí' : 'No',
+        Monto: Number(m.monto), // Forzamos a número para que Excel lo sume bien
+      };
+    });
+
+    this.exportService.exportarExcel(datosParaExcel, 'Movimientos_Caja_Grupo108');
+  }
+
+  // 👇 FUNCIÓN PARA PDF
+  descargarPDF() {
+    const columnas = ['Fecha', 'Tipo', 'Concepto', 'Responsable', 'Comprobante', 'Monto'];
+
+    const datosParaPDF = this.movimientosOrdenados().map((m) => {
+      const responsable = m.persona_involucrada
+        ? `${m.persona_involucrada} (Sist: ${m.usuario_nombre || 'Auto'})`
+        : `Sist: ${m.usuario_nombre || 'Automático'}`;
+
+      return [
+        this.datePipe.transform(m.fecha, 'dd/MM/yyyy HH:mm') || m.fecha,
+        m.tipo,
+        m.concepto,
+        responsable,
+        m.comprobante ? 'Sí' : '-',
+        `$ ${Number(m.monto).toLocaleString('es-AR')}`, // Formato plata: $ 1.500
+      ];
+    });
+
+    this.exportService.exportarPDF(
+      columnas,
+      datosParaPDF,
+      'Movimientos_Caja_Grupo108',
+      'Reporte de Caja - Tesorería',
+    );
   }
 }

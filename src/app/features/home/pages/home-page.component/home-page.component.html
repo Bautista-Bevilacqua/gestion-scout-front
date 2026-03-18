@@ -1,8 +1,13 @@
-<div class="p-6 md:p-10 bg-base-200 min-h-screen">
-  <div class="mb-10">
-    <h1 class="text-4xl font-black text-base-content mb-2">¡Hola, {{ nombreUsuario() }}! 👋</h1>
+<div class="p-4 md:p-8 bg-base-200 min-h-screen">
+  <div class="mb-8">
+    <h1 class="text-3xl md:text-4xl font-black text-base-content mb-2">
+      ¡Hola, {{ nombreUsuario() }}! 👋
+    </h1>
     <p class="text-lg opacity-70">
-      Bienvenido al panel de control del Grupo 108. Acá tenés un resumen de hoy.
+      Bienvenido al panel de control del Grupo 108.
+      @if (!isAdmin()) {
+        Rama: <strong>{{ rolUsuario() }}</strong>
+      }
     </p>
   </div>
 
@@ -11,91 +16,118 @@
       <span class="loading loading-spinner loading-lg text-primary"></span>
     </div>
   } @else {
-    <div class="stats stats-vertical lg:stats-horizontal shadow-xl w-full mb-10 bg-base-100">
-      <div class="stat">
-        <div class="stat-figure text-primary text-4xl">⚜️</div>
-        <div class="stat-title font-bold">Beneficiarios Activos</div>
-        <div class="stat-value text-primary">{{ totalBeneficiarios() }}</div>
-        <div class="stat-desc">Chicos registrados en el sistema</div>
-      </div>
+    @if (isAdmin()) {
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 w-full">
+        <div class="stat bg-base-100 shadow-md rounded-box border border-base-200">
+          <div class="stat-figure text-primary text-4xl">⚜️</div>
+          <div class="stat-title font-bold text-base">Beneficiarios Activos</div>
+          <div class="stat-value text-primary text-3xl">{{ totalBeneficiarios() }}</div>
+        </div>
 
-      <div class="stat">
-        <div class="stat-figure text-secondary text-4xl">👨‍👩‍👧‍👦</div>
-        <div class="stat-title font-bold">Familias</div>
-        <div class="stat-value text-secondary">{{ totalFamilias() }}</div>
-        <div class="stat-desc">Grupos familiares vinculados</div>
-      </div>
+        <div class="stat bg-base-100 shadow-md rounded-box border border-base-200">
+          <div class="stat-figure text-secondary text-4xl">👨‍👩‍👧‍👦</div>
+          <div class="stat-title font-bold text-base">Familias</div>
+          <div class="stat-value text-secondary text-3xl">{{ totalFamilias() }}</div>
+        </div>
 
-      @if (isAdmin()) {
-        <div class="stat">
+        <div class="stat bg-base-100 shadow-md rounded-box border border-base-200">
           <div class="stat-figure text-success text-4xl">💰</div>
-          <div class="stat-title font-bold">Balance de Caja</div>
+          <div class="stat-title font-bold text-base">Caja General</div>
           <div
-            class="stat-value"
+            class="stat-value text-3xl"
             [class.text-success]="balanceCaja() >= 0"
             [class.text-error]="balanceCaja() < 0"
           >
             ${{ balanceCaja() }}
           </div>
-          <div class="stat-desc">Plata disponible en el grupo</div>
         </div>
-      }
-    </div>
+      </div>
 
-    <h2 class="text-2xl font-bold mb-6 text-base-content border-b border-base-300 pb-2">
-      ⚡ Accesos Rápidos
-    </h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      @if (isAdmin()) {
+      <h2 class="text-xl font-bold mb-4 text-base-content border-b border-base-300 pb-2">
+        ⚡ Accesos Rápidos
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <a
           routerLink="/beneficiarios/nuevo"
           class="card bg-base-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer border border-base-300"
         >
-          <div class="card-body items-center text-center p-6">
-            <div class="text-4xl mb-2">📝</div>
-            <h3 class="card-title text-lg">Inscribir Chico</h3>
-            <p class="text-xs opacity-60">Cargar un nuevo beneficiario</p>
+          <div class="card-body flex-row items-center p-4 gap-4">
+            <div class="text-3xl bg-base-200 p-2 rounded-lg">📝</div>
+            <div>
+              <h3 class="font-bold text-base">Inscribir Chico</h3>
+              <p class="text-xs opacity-60">Cargar beneficiario</p>
+            </div>
           </div>
         </a>
-      }
 
-      <a
-        routerLink="/beneficiarios"
-        class="card bg-base-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer border border-base-300"
-      >
-        <div class="card-body items-center text-center p-6">
-          <div class="text-4xl mb-2">🏕️</div>
-          <h3 class="card-title text-lg">Nóminas</h3>
-          <p class="text-xs opacity-60">Ver listas por ramas</p>
-        </div>
-      </a>
+        <a
+          routerLink="/beneficiarios"
+          class="card bg-base-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer border border-base-300"
+        >
+          <div class="card-body flex-row items-center p-4 gap-4">
+            <div class="text-3xl bg-base-200 p-2 rounded-lg">🏕️</div>
+            <div>
+              <h3 class="font-bold text-base">Nóminas</h3>
+              <p class="text-xs opacity-60">Ver todas las ramas</p>
+            </div>
+          </div>
+        </a>
 
-      @if (isAdmin()) {
         <a
           routerLink="/tesoreria/caja"
           class="card bg-base-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer border border-base-300"
         >
-          <div class="card-body items-center text-center p-6">
-            <div class="text-4xl mb-2">💵</div>
-            <h3 class="card-title text-lg">Libro Mayor</h3>
-            <p class="text-xs opacity-60">Registrar gastos o ingresos</p>
+          <div class="card-body flex-row items-center p-4 gap-4">
+            <div class="text-3xl bg-base-200 p-2 rounded-lg">💵</div>
+            <div>
+              <h3 class="font-bold text-base">Libro Mayor</h3>
+              <p class="text-xs opacity-60">Ingresos y egresos</p>
+            </div>
           </div>
         </a>
-      }
 
-      @if (isAdmin()) {
         <a
           routerLink="/usuarios"
           class="card bg-base-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer border border-base-300"
         >
-          <div class="card-body items-center text-center p-6">
-            <div class="text-4xl mb-2">👥</div>
-            <h3 class="card-title text-lg">Dirigentes</h3>
-            <p class="text-xs opacity-60">Gestionar accesos y roles</p>
+          <div class="card-body flex-row items-center p-4 gap-4">
+            <div class="text-3xl bg-base-200 p-2 rounded-lg">👥</div>
+            <div>
+              <h3 class="font-bold text-base">Dirigentes</h3>
+              <p class="text-xs opacity-60">Gestionar accesos</p>
+            </div>
           </div>
         </a>
-      }
-    </div>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 w-full max-w-3xl">
+        <div class="stat bg-base-100 shadow-md rounded-box border border-base-200">
+          <div class="stat-figure text-primary text-4xl opacity-50">⛺</div>
+          <div class="stat-title font-bold text-base">Beneficiarios en mi Rama</div>
+          <div class="stat-value text-primary text-3xl">{{ beneficiariosDeMiRama() }}</div>
+          <div class="stat-desc mt-1">
+            Total de chicos asignados a {{ rolUsuario() | lowercase }}
+          </div>
+        </div>
+      </div>
+
+      <h2 class="text-xl font-bold mb-4 text-base-content border-b border-base-300 pb-2">
+        ⚡ Mi Gestión
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl">
+        <a
+          [routerLink]="getLinkMiRama()"
+          class="card bg-base-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer border border-base-300"
+        >
+          <div class="card-body flex-row items-center p-4 gap-4">
+            <div class="text-3xl bg-base-200 p-2 rounded-lg">📋</div>
+            <div>
+              <h3 class="font-bold text-base">Ver mi Nómina</h3>
+              <p class="text-xs opacity-60">Listado de mis beneficiarios</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    }
   }
 </div>

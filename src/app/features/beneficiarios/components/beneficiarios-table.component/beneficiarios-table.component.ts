@@ -12,6 +12,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Beneficiario } from '../../../../models/beneficiario.model';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ExportService } from '../../../../core/services/export.service';
 
 @Component({
   selector: 'app-tabla-beneficiarios',
@@ -21,6 +22,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 })
 export class BeneficiariosTableComponent {
   private authService = inject(AuthService);
+  private exportService = inject(ExportService);
   // Recibe la lista desde la página
   beneficiarios = input<Beneficiario[]>([]);
 
@@ -68,5 +70,57 @@ export class BeneficiariosTableComponent {
 
   eliminar(b: Beneficiario) {
     this.onEliminar.emit(b);
+  }
+
+  public infoExportacion = computed(() => {
+    const lista = this.beneficiariosOrdenados();
+
+    if (lista.length === 0) {
+      return { archivo: 'Nomina_Vacia', titulo: 'Nómina Oficial' };
+    }
+
+    const ramasUnicas = [...new Set(lista.map((b) => b.rama_actual))];
+
+    if (ramasUnicas.length === 1) {
+      const rama = ramasUnicas[0];
+      return {
+        archivo: `Nomina_${rama}_Grupo108`,
+        titulo: `Nómina Oficial - Rama ${rama}`,
+      };
+    }
+
+    return {
+      archivo: 'Nomina_General_Grupo108',
+      titulo: 'Nómina General - Grupo Scout 108',
+    };
+  });
+
+  descargarExcel() {
+    const datosParaExcel = this.beneficiariosOrdenados().map((b) => ({
+      DNI: b.dni,
+      'Apellido y Nombre': `${b.apellido}, ${b.nombre}`,
+      'Fecha Nac.': b.fecha_nacimiento,
+      Rama: b.rama_actual,
+    }));
+
+    this.exportService.exportarExcel(datosParaExcel, this.infoExportacion().archivo);
+  }
+
+  descargarPDF() {
+    const columnas = ['DNI', 'Apellido y Nombre', 'Fecha Nac.', 'Rama'];
+
+    const datosParaPDF = this.beneficiariosOrdenados().map((b) => [
+      b.dni,
+      `${b.apellido}, ${b.nombre}`,
+      b.fecha_nacimiento,
+      b.rama_actual,
+    ]);
+
+    this.exportService.exportarPDF(
+      columnas,
+      datosParaPDF,
+      this.infoExportacion().archivo,
+      this.infoExportacion().titulo,
+    );
   }
 }
