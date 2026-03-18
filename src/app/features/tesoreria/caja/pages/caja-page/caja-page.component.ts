@@ -41,15 +41,16 @@ export class CajaPageComponent implements OnInit {
     this.cargarCaja();
   }
 
-  cargarCaja() {
+  cargarCaja(forzarRecarga: boolean = false) {
     this.cargando.set(true);
-    this.cajaService.getMovimientos(this.fechaDesde(), this.fechaHasta()).subscribe({
-      next: (data) => {
-        this.movimientos.set(data);
+
+    this.cajaService.getMovimientos(this.fechaDesde(), this.fechaHasta(), forzarRecarga).subscribe({
+      next: (datos) => {
+        this.movimientos.set(datos);
         this.cargando.set(false);
       },
-      error: (err) => {
-        console.error(err);
+      error: () => {
+        console.error('Error al cargar la caja');
         this.cargando.set(false);
       },
     });
