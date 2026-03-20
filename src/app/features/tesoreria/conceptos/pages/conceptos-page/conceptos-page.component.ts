@@ -6,8 +6,8 @@ import { ConceptoCobro } from '../../../../../models/concepto-cobro.model';
 import { AlertErrorComponent } from '../../../../../shared/components/alert-error/alert-error.component';
 import { LoadingSpinnerComponent } from '../../../../../shared/components/loading-spinner.component/loading-spinner.component';
 import { ConfirmModalComponent } from '../../../../../shared/components/confirm-modal/confirm-modal.component';
-import { AlertSuccessComponent } from "../../../../../shared/components/alert-success/alert-success.component";
-import { GenerarCuotasModalComponent } from "../../components/generar-cuotas-modal/generar-cuotas-modal.component";
+import { AlertSuccessComponent } from '../../../../../shared/components/alert-success/alert-success.component';
+import { GenerarCuotasModalComponent } from '../../components/generar-cuotas-modal/generar-cuotas-modal.component';
 
 @Component({
   selector: 'app-conceptos-page',
@@ -19,8 +19,8 @@ import { GenerarCuotasModalComponent } from "../../components/generar-cuotas-mod
     LoadingSpinnerComponent,
     ConfirmModalComponent,
     AlertSuccessComponent,
-    GenerarCuotasModalComponent
-],
+    GenerarCuotasModalComponent,
+  ],
   templateUrl: './conceptos-page.component.html',
 })
 export class ConceptosPageComponent implements OnInit {
@@ -36,7 +36,8 @@ export class ConceptosPageComponent implements OnInit {
 
   public conceptoForm = this.fb.group({
     nombre: ['', Validators.required],
-    monto_base: ['', [Validators.required, Validators.min(0)]],
+    monto_efectivo: ['', [Validators.required, Validators.min(0)]],
+    monto_transferencia: ['', [Validators.required, Validators.min(0)]],
     alcance: ['GRUPO', Validators.required],
     fecha_vencimiento: [''],
   });
@@ -75,24 +76,22 @@ export class ConceptosPageComponent implements OnInit {
 
     this.guardando.set(true);
 
-    // 1. Extraemos los valores crudos del formulario
     const formValue = this.conceptoForm.value;
 
-    // 2. Los empaquetamos asegurándole a TypeScript el tipo de dato correcto
     const nuevoConcepto: Partial<ConceptoCobro> = {
-      nombre: formValue.nombre!, // El "!" le promete a TypeScript que esto no es null
-      monto_base: Number(formValue.monto_base), // Lo convertimos a número real
+      nombre: formValue.nombre!,
+      monto_efectivo: Number(formValue.monto_efectivo),
+      monto_transferencia: Number(formValue.monto_transferencia),
       alcance: formValue.alcance as 'GRUPO' | 'MANADA' | 'UNIDAD' | 'CAMINANTES' | 'ROVERS',
       // Si no pusieron fecha, mandamos undefined para que la base de datos ponga NULL
       fecha_vencimiento: formValue.fecha_vencimiento ? formValue.fecha_vencimiento : undefined,
     };
 
-    // 3. Ahora sí, mandamos el objeto perfecto al servicio
     this.conceptoService.crearConcepto(nuevoConcepto).subscribe({
       next: () => {
         this.guardando.set(false);
         this.cerrarModal();
-        this.cargarConceptos(true); // Recargamos la tabla
+        this.cargarConceptos(true);
       },
       error: () => {
         this.errorMsg.set('Hubo un error al crear el concepto.');
@@ -107,7 +106,6 @@ export class ConceptosPageComponent implements OnInit {
     modal?.showModal();
   }
 
-  // 3. Método que se ejecuta cuando el usuario hace clic en "Eliminar" dentro del modal
   confirmarBorrado() {
     const concepto = this.conceptoSeleccionado();
     if (!concepto) return;
@@ -116,19 +114,15 @@ export class ConceptosPageComponent implements OnInit {
 
     this.conceptoService.eliminarConcepto(concepto.id_concepto).subscribe({
       next: () => {
-        // Cerramos el modal
         const modal = document.getElementById('modal_borrar_concepto') as HTMLDialogElement;
         modal?.close();
 
-        // Recargamos la lista
         this.cargarConceptos(true);
       },
       error: (err) => {
-        // Cerramos el modal también si hay error para mostrar el cartel rojo
         const modal = document.getElementById('modal_borrar_concepto') as HTMLDialogElement;
         modal?.close();
 
-        // Atajamos el error específico de la base de datos (ON DELETE RESTRICT)
         if (err.status === 400) {
           this.errorMsg.set(
             'No podés borrar este concepto porque ya hay beneficiarios que lo deben.',
@@ -147,14 +141,13 @@ export class ConceptosPageComponent implements OnInit {
     modal?.showModal();
   }
 
-  // 2. Ejecuta la orden cuando tocan el botón del modal
   confirmarAsignacion() {
     const concepto = this.conceptoSeleccionado();
     if (!concepto) return;
 
     this.cargando.set(true);
-    this.errorMsg.set(null); // Limpiamos errores viejos
-    this.exitoMsg.set(null); // Limpiamos éxitos viejos
+    this.errorMsg.set(null);
+    this.exitoMsg.set(null);
 
     this.conceptoService.asignarConcepto(concepto.id_concepto).subscribe({
       next: (respuesta) => {
@@ -162,7 +155,6 @@ export class ConceptosPageComponent implements OnInit {
         modal?.close();
 
         this.cargando.set(false);
-        // ACÁ USAMOS NUESTRA SEÑAL LINDA
         this.exitoMsg.set(
           `¡Éxito! Se generaron ${respuesta.cantidad} nuevas deudas de "${concepto.nombre}".`,
         );

@@ -29,7 +29,8 @@
         <thead class="bg-base-300 text-base-content text-sm">
           <tr>
             <th>Concepto</th>
-            <th>Monto Base</th>
+            <th>Efectivo</th>
+            <th>MP / Transf.</th>
             <th>Alcance</th>
             <th>Vencimiento</th>
             <th class="text-center">Acciones</th>
@@ -39,7 +40,8 @@
           @for (c of conceptos(); track c.id_concepto) {
             <tr class="hover">
               <td class="font-bold">{{ c.nombre }}</td>
-              <td class="text-success font-medium">${{ c.monto_base }}</td>
+              <td class="text-success font-medium">${{ c.monto_efectivo }}</td>
+              <td class="text-info font-medium">${{ c.monto_transferencia }}</td>
               <td>
                 <div
                   class="badge badge-outline"
@@ -100,12 +102,22 @@
 
       <div class="grid grid-cols-2 gap-4">
         <label class="form-control w-full">
-          <div class="label"><span class="label-text font-bold">Monto Base ($)</span></div>
+          <div class="label"><span class="label-text font-bold">Efectivo ($)</span></div>
           <input
             type="number"
-            formControlName="monto_base"
+            formControlName="monto_efectivo"
             class="input input-bordered w-full"
             placeholder="Ej: 5000"
+          />
+        </label>
+
+        <label class="form-control w-full">
+          <div class="label"><span class="label-text font-bold">MP / Transf. ($)</span></div>
+          <input
+            type="number"
+            formControlName="monto_transferencia"
+            class="input input-bordered w-full"
+            placeholder="Ej: 5500"
           />
         </label>
 

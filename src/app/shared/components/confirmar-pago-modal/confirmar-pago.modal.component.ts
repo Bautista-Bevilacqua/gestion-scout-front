@@ -13,11 +13,11 @@ export class ConfirmarPagoModalComponent {
   cargo = input<Partial<Cargo> | null>(null);
   procesando = input<boolean>(false);
 
-  // Avisamos a la página qué decidió el usuario
-  onConfirmar = output<'EFECTIVO' | 'MERCADOPAGO'>();
+  // Avisamos a la página qué decidió el usuario (sumamos TRANSFERENCIA)
+  onConfirmar = output<'EFECTIVO' | 'MERCADOPAGO' | 'TRANSFERENCIA'>();
   onCerrar = output<void>();
 
-  confirmar(metodo: 'EFECTIVO' | 'MERCADOPAGO') {
+  confirmar(metodo: 'EFECTIVO' | 'MERCADOPAGO' | 'TRANSFERENCIA') {
     this.onConfirmar.emit(metodo);
   }
 

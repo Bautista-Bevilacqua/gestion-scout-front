@@ -35,7 +35,8 @@ export class GenerarCuotasModalComponent {
   public cuotasForm = this.fb.group({
     meses: [[] as string[], [Validators.required, Validators.minLength(1)]],
     anio: [new Date().getFullYear(), [Validators.required, Validators.min(2024)]],
-    monto_base: ['', [Validators.required, Validators.min(0)]],
+    monto_efectivo: ['', [Validators.required, Validators.min(0)]], 
+    monto_transferencia: ['', [Validators.required, Validators.min(0)]],
     alcance: ['GRUPO', Validators.required],
     fecha_vencimiento: [''],
   });
