@@ -155,6 +155,7 @@
                 <tr>
                   <th>Fecha</th>
                   <th>Concepto</th>
+                  <th class="text-center">Medio de Pago</th>
                   <th>Monto</th>
                   <th>Cobrador</th>
                 </tr>
@@ -165,6 +166,13 @@
                     <tr class="hover opacity-80">
                       <td>{{ c.fecha_pago | date: 'dd/MM/yyyy' }}</td>
                       <td class="font-medium">{{ c.concepto_nombre }}</td>
+
+                      <td class="text-center">
+                        <div class="badge badge-outline badge-sm font-semibold">
+                          {{ c.metodo_pago || 'EFECTIVO' }}
+                        </div>
+                      </td>
+
                       <td class="font-bold">${{ c.monto_final }}</td>
                       <td class="text-xs italic">
                         {{ c.cobrador_nombre }} {{ c.cobrador_apellido }}
