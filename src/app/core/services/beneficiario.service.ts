@@ -52,4 +52,12 @@ export class BeneficiarioService {
   getPorFamilia(idFamilia: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/familia/${idFamilia}`);
   }
+
+  getHistorial(idBeneficiario: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${idBeneficiario}/historial`);
+  }
+
+  agregarAlHistorial(idBeneficiario: number, descripcion: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${idBeneficiario}/historial`, { descripcion });
+  }
 }

@@ -1,6 +1,8 @@
 export interface Cargo {
   id_cargo: number;
-  monto_final: string | number;
+  monto_efectivo: string | number;
+  monto_transferencia: string | number;
+  monto_pagado?: string | number;
   estado: 'PENDIENTE' | 'PAGADO' | 'ANULADO';
   fecha_cargo: string;
   concepto_nombre: string;

@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+::ng-deep .fc-event {
+  cursor: grab !important; /* Cambia el mouse a una manito al pasar por encima */
+}
+
+::ng-deep .fc-event:active {
+  cursor: grabbing !important; /* Cambia a "agarre" mientras arrastrás */
+}

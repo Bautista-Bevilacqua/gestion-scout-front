@@ -32,10 +32,16 @@ export class CuentaCorrientePageComponent implements OnInit {
   public seleccionados = signal<Set<number>>(new Set());
 
   // Este se recalcula solo cada vez que tildás/destildás algo
-  public totalSeleccionado = computed(() => {
+  public totalSeleccionadoEfectivo = computed(() => {
     return this.cargos()
       .filter((c) => this.seleccionados().has(c.id_cargo))
-      .reduce((acc, curr) => acc + Number(curr.monto_final), 0);
+      .reduce((acc, curr) => acc + Number(curr.monto_efectivo), 0);
+  });
+
+  public totalSeleccionadoTransferencia = computed(() => {
+    return this.cargos()
+      .filter((c) => this.seleccionados().has(c.id_cargo))
+      .reduce((acc, curr) => acc + Number(curr.monto_transferencia), 0);
   });
 
   // --- LÓGICA DE COBRO ---
@@ -53,7 +59,6 @@ export class CuentaCorrientePageComponent implements OnInit {
 
   cargarDatos(id: number) {
     this.cargando.set(true);
-    // Limpiamos selección al recargar para evitar IDs viejos
     this.seleccionados.set(new Set());
 
     this.beneficiarioService.getBeneficiarioById(id).subscribe((b) => this.beneficiario.set(b));
@@ -63,7 +68,7 @@ export class CuentaCorrientePageComponent implements OnInit {
         this.cargos.set(data);
         const total = data
           .filter((c) => c.estado === 'PENDIENTE')
-          .reduce((acc, curr) => acc + Number(curr.monto_final), 0);
+          .reduce((acc, curr) => acc + Number(curr.monto_efectivo), 0);
         this.deudaTotal.set(total);
         this.cargando.set(false);
       },
@@ -98,9 +103,11 @@ export class CuentaCorrientePageComponent implements OnInit {
   prepararCobroMultiple() {
     if (this.seleccionados().size === 0) return;
 
+    // Le pasamos al modal ambos precios para que pueda decidir
     this.cargoAAsignar.set({
       concepto_nombre: `${this.seleccionados().size} conceptos seleccionados`,
-      monto_final: this.totalSeleccionado(),
+      monto_efectivo: this.totalSeleccionadoEfectivo(),
+      monto_transferencia: this.totalSeleccionadoTransferencia(),
     });
     this.abrirModal();
   }

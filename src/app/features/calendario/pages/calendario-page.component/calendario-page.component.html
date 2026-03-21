@@ -1,0 +1,175 @@
+<div class="p-4 md:p-10 bg-base-200 min-h-screen">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-black text-base-content">Calendario Scout</h1>
+      <p class="text-sm opacity-70 italic">Actividades, campamentos y reuniones ⚜️</p>
+    </div>
+    <button class="btn btn-primary btn-block sm:btn-md sm:w-auto" (click)="abrirModalNuevo()">
+      <span class="text-lg">+</span> Nuevo Evento
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+    <div class="lg:col-span-3 card bg-base-100 shadow-xl p-2 sm:p-4 md:p-6 overflow-x-auto">
+      <div class="min-w-[600px] lg:min-w-full">
+        <full-calendar [options]="calendarOptions"></full-calendar>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <div class="card bg-base-100 shadow-xl lg:sticky lg:top-6">
+        <div class="card-body p-5 md:p-6">
+          <h2 class="card-title text-lg mb-4 flex items-center gap-2">
+            <span>⛺</span> Próximos Eventos
+          </h2>
+
+          <div class="flex flex-col gap-3">
+            @for (evento of proximosEventos(); track evento.id_evento) {
+              <div
+                class="flex gap-4 items-center group hover:bg-base-200 p-3 -mx-2 rounded-xl transition-all cursor-pointer border border-transparent hover:border-base-300"
+                (click)="verDetalleEvento(evento.id_evento.toString())"
+              >
+                <div
+                  class="flex flex-col items-center justify-center bg-base-200 group-hover:bg-base-300 rounded-lg min-w-[3.5rem] py-2 shadow-sm"
+                >
+                  <span class="text-[10px] uppercase font-bold text-base-content/60">{{
+                    evento.fecha_inicio | date: 'MMM'
+                  }}</span>
+                  <span class="text-xl font-black leading-none">{{
+                    evento.fecha_inicio | date: 'dd'
+                  }}</span>
+                </div>
+
+                <div class="flex flex-col flex-1 min-w-0">
+                  <span class="font-bold truncate text-sm" [style.color]="evento.color">{{
+                    evento.titulo
+                  }}</span>
+                  <span class="text-[11px] opacity-60 flex items-center gap-1">
+                    <span class="badge badge-xs" [style.background-color]="evento.color"></span>
+                    {{ evento.alcance }}
+                    @if (evento.fecha_inicio.includes('T')) {
+                      • {{ evento.fecha_inicio | date: 'HH:mm' }}hs
+                    }
+                  </span>
+                </div>
+              </div>
+            } @empty {
+              <div class="text-center py-10 opacity-40">
+                <p class="text-4xl mb-3">🍃</p>
+                <p class="text-sm">Sin eventos a la vista</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<dialog id="modal_nuevo_evento" class="modal modal-bottom sm:modal-middle">
+  <div class="modal-box max-w-lg">
+    <h3 class="font-bold text-xl mb-6 flex items-center gap-2">
+      <span>{{ eventoSeleccionado() ? '✏️' : '✨' }}</span>
+      {{ eventoSeleccionado() ? 'Editar Actividad' : 'Nueva Actividad' }}
+    </h3>
+
+    <form [formGroup]="eventoForm" (ngSubmit)="guardar()" class="flex flex-col gap-5">
+      <div class="form-control bg-base-200 p-4 rounded-2xl border border-base-300">
+        <label class="label cursor-pointer p-0">
+          <span class="label-text font-bold uppercase text-xs">¿Actividad de todo el día?</span>
+          <input
+            type="checkbox"
+            formControlName="todo_el_dia"
+            class="toggle toggle-primary toggle-sm"
+          />
+        </label>
+      </div>
+
+      <label class="form-control w-full">
+        <div class="label px-1">
+          <span class="label-text font-bold text-xs uppercase opacity-70">Título</span>
+        </div>
+        <input
+          type="text"
+          formControlName="titulo"
+          class="input input-bordered focus:input-primary"
+          placeholder="Ej: Acantonamiento"
+        />
+      </label>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <label class="form-control w-full">
+          <div class="label px-1">
+            <span class="label-text font-bold text-xs uppercase opacity-70">Fecha Inicio</span>
+          </div>
+          <input type="date" formControlName="fecha_inicio" class="input input-bordered" />
+        </label>
+        @if (!eventoForm.value.todo_el_dia) {
+          <label class="form-control w-full">
+            <div class="label px-1">
+              <span class="label-text font-bold text-xs uppercase opacity-70">Hora Inicio</span>
+            </div>
+            <input type="time" formControlName="hora_inicio" class="input input-bordered" />
+          </label>
+        }
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <label class="form-control w-full">
+          <div class="label px-1">
+            <span class="label-text font-bold text-xs uppercase opacity-70">Fecha Fin</span>
+          </div>
+          <input type="date" formControlName="fecha_fin" class="input input-bordered" />
+        </label>
+        @if (!eventoForm.value.todo_el_dia) {
+          <label class="form-control w-full">
+            <div class="label px-1">
+              <span class="label-text font-bold text-xs uppercase opacity-70">Hora Fin</span>
+            </div>
+            <input type="time" formControlName="hora_fin" class="input input-bordered" />
+          </label>
+        }
+      </div>
+
+      <label class="form-control w-full">
+        <div class="label px-1">
+          <span class="label-text font-bold text-xs uppercase opacity-70">Rama / Sección</span>
+        </div>
+        <select
+          formControlName="alcance"
+          class="select select-bordered focus:select-primary"
+          (change)="cambiarRama($event)"
+        >
+          <option value="GRUPO">Todo el Grupo (Azul)</option>
+          <option value="MANADA">Manada (Amarillo)</option>
+          <option value="UNIDAD">Unidad (Verde)</option>
+          <option value="CAMINANTES">Caminantes (Celeste)</option>
+          <option value="ROVERS">Rovers (Rojo)</option>
+        </select>
+      </label>
+
+      <label class="form-control w-full">
+        <div class="label px-1">
+          <span class="label-text font-bold text-xs uppercase opacity-70">Descripción</span>
+        </div>
+        <textarea
+          formControlName="descripcion"
+          class="textarea textarea-bordered h-24 focus:textarea-primary"
+          placeholder="Lugar, costo..."
+        ></textarea>
+      </label>
+
+      <div class="modal-action flex-col-reverse sm:flex-row gap-2">
+        <button type="button" class="btn btn-ghost flex-1" (click)="cerrarModal()">Cancelar</button>
+        <button
+          type="submit"
+          class="btn btn-primary flex-1"
+          [disabled]="eventoForm.invalid || guardando()"
+        >
+          {{ guardando() ? 'Guardando...' : 'Confirmar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button (click)="cerrarModal()">close</button></form>
+</dialog>

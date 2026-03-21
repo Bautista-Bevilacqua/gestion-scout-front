@@ -24,6 +24,13 @@ export const routes: Routes = [
     children: [
       { path: '', component: HomePageComponent },
       {
+        path: 'calendario',
+        loadComponent: () =>
+          import('./features/calendario/pages/calendario-page.component/calendario-page.component').then(
+            (m) => m.CalendarioPageComponent,
+          ),
+      },
+      {
         path: 'beneficiarios',
         loadChildren: () =>
           import('./features/beneficiarios/beneficiarios.routes').then(

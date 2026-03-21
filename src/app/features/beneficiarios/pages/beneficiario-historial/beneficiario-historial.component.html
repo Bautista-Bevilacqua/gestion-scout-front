@@ -1,0 +1,82 @@
+<div class="p-6 md:p-10 bg-base-200 min-h-screen">
+  <div class="mb-6">
+    <a routerLink="/beneficiarios" class="btn btn-ghost btn-sm">← Volver a la nómina</a>
+  </div>
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-black text-base-content flex items-center gap-3">
+      Historial de
+      <span class="text-accent">{{ beneficiario()?.nombre }} {{ beneficiario()?.apellido }}</span>
+    </h1>
+    <p class="opacity-70 mt-2">Anotaciones, progresión personal y observaciones.</p>
+  </div>
+
+  @if (isAdmin()) {
+    <div class="card bg-base-100 shadow-xl mb-8 border-t-4 border-accent">
+      <div class="card-body">
+        <h2 class="card-title text-accent">Nueva Anotación</h2>
+        <form [formGroup]="formRegistro" (ngSubmit)="agregarRegistro()" class="flex flex-col gap-4">
+          <textarea
+            formControlName="descripcion"
+            class="textarea textarea-bordered w-full h-24 text-base"
+            placeholder="Ej: Realizó su Promesa Scout / Tuvo un golpe en el codo durante el juego..."
+          ></textarea>
+
+          <div class="flex justify-end">
+            <button
+              type="submit"
+              class="btn btn-accent px-8"
+              [disabled]="formRegistro.invalid || guardando()"
+            >
+              @if (guardando()) {
+                <span class="loading loading-spinner"></span> Guardando...
+              } @else {
+                💾 Guardar Registro
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body p-0">
+      @if (cargando()) {
+        <div class="flex justify-center py-10">
+          <span class="loading loading-dots loading-lg text-accent"></span>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="table w-full">
+            <thead class="bg-base-200 text-base-content text-sm">
+              <tr>
+                <th class="w-32">Fecha</th>
+                <th>Descripción</th>
+                <th class="w-48 text-right">Anotado por</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (reg of historial(); track reg.id_historial) {
+                <tr class="hover">
+                  <td class="whitespace-nowrap font-medium text-base-content/70">
+                    {{ reg.fecha | date: 'dd/MM/yyyy HH:mm' }}
+                  </td>
+                  <td class="whitespace-pre-wrap">{{ reg.descripcion }}</td>
+                  <td class="text-right text-xs italic opacity-60">
+                    {{ reg.dirigente_nombre }} {{ reg.dirigente_apellido }}
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="text-center py-12 opacity-50 italic">
+                    Aún no hay anotaciones en el historial de este beneficiario.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>

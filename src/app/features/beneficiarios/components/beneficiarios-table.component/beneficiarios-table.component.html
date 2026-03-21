@@ -42,6 +42,8 @@
 
         <th class="text-center">Legajo</th>
 
+        <th class="text-center">Historial</th>
+
         @if (isAdmin()) {
           <th class="text-center">Acciones</th>
         }
@@ -81,6 +83,17 @@
             </a>
           </td>
 
+          <td class="text-center px-1 md:px-4">
+            <a
+              [routerLink]="['/beneficiarios', b.id_beneficiario, 'historial']"
+              class="btn btn-xs md:btn-sm btn-square md:w-auto md:px-3 btn-outline btn-accent"
+              title="Ver Historial"
+            >
+              <span>📖</span>
+              <span class="hidden lg:inline ml-1">Historia</span>
+            </a>
+          </td>
+
           @if (isAdmin()) {
             <td class="text-center px-1 md:px-4">
               <div class="flex justify-center gap-1">
@@ -114,7 +127,7 @@
       } @empty {
         <tr>
           <td
-            [attr.colspan]="isAdmin() ? 5 : 4"
+            [attr.colspan]="isAdmin() ? 6 : 5"
             class="text-center py-8 text-base-content/50 italic"
           >
             No hay beneficiarios registrados en el sistema.

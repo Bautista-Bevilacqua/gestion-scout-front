@@ -6,7 +6,9 @@
   <div class="mb-8">
     <h1 class="text-3xl font-black text-base-content flex items-center gap-3">
       Legajo de
-      <span class="text-secondary">{{ beneficiario().nombre }} {{ beneficiario().apellido }}</span>
+      <span class="text-secondary">
+        {{ beneficiario()?.nombre }} {{ beneficiario()?.apellido }}
+      </span>
     </h1>
     <p class="opacity-70 mt-2">Documentación respaldatoria (DNI, Fichas Médicas, Autorizaciones)</p>
   </div>
@@ -67,10 +69,10 @@
 
             <div class="flex flex-col gap-1">
               <a
-                [href]="urlBackend + '/uploads/' + doc.nombre_archivo"
+                [href]="getDocUrl(doc.nombre_archivo)"
                 target="_blank"
+                rel="noopener noreferrer"
                 class="btn btn-xs btn-ghost btn-circle text-info"
-                title="Ver / Descargar"
               >
                 👁️
               </a>

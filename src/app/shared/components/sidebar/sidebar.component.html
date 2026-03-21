@@ -47,6 +47,18 @@
     </a>
   </li>
 
+  <li class="mb-2">
+    <a
+      routerLink="/calendario"
+      (click)="cerrarMenuEnMovil()"
+      routerLinkActive="bg-base-200 font-bold"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="text-lg font-bold py-4 text-base-content hover:bg-base-200"
+    >
+      📆 Calendario
+    </a>
+  </li>
+
   @if (usuarioActual()?.rol === 'ADMIN') {
     <li>
       <details>

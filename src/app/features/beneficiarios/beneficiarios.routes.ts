@@ -50,4 +50,11 @@ export const beneficiariosRoutes: Routes = [
     loadComponent: () =>
       import('./pages/legajo-page/legajo-page.component').then((m) => m.LegajoPageComponent),
   },
+  {
+    path: ':id/historial',
+    loadComponent: () =>
+      import('./pages/beneficiario-historial/beneficiario-historial.component').then(
+        (m) => m.HistorialPageComponent,
+      ),
+  },
 ];

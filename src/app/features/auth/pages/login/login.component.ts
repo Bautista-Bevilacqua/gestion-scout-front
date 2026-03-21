@@ -19,7 +19,7 @@ export class LoginComponent {
   // Señal para mostrar un cartel rojo si le pifia a la contraseña
   public errorMsg = signal<string | null>(null);
   public cargando = signal<boolean>(false);
-
+  public mostrarPassword = signal<boolean>(false);
   public formEnviado = signal<boolean>(false);
 
   // Armamos el formulario con sus validaciones
@@ -27,6 +27,10 @@ export class LoginComponent {
     email: ['', [Validators.required, CustomValidators.emailValido]],
     password: ['', [Validators.required]],
   });
+
+  togglePassword() {
+    this.mostrarPassword.update((valor) => !valor);
+  }
 
   campoEsInvalido(campo: string): boolean {
     const control = this.loginForm.get(campo);
