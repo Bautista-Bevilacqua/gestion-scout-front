@@ -16,13 +16,11 @@ export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // Señal para mostrar un cartel rojo si le pifia a la contraseña
   public errorMsg = signal<string | null>(null);
   public cargando = signal<boolean>(false);
   public mostrarPassword = signal<boolean>(false);
   public formEnviado = signal<boolean>(false);
 
-  // Armamos el formulario con sus validaciones
   public loginForm = this.fb.group({
     email: ['', [Validators.required, CustomValidators.emailValido]],
     password: ['', [Validators.required]],

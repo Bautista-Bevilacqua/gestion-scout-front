@@ -30,4 +30,8 @@ export class CargoService {
   pagarMultiplesCargos(ids: number[], metodoPago: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/pagar-multiples`, { ids, metodoPago });
   }
+
+  eliminarCargo(idCargo: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${idCargo}`);
+  }
 }

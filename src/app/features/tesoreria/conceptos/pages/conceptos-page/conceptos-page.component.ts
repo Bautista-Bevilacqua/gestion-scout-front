@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConceptoService } from '../../../../../core/services/concepto.service';
@@ -34,12 +34,32 @@ export class ConceptosPageComponent implements OnInit {
   public exitoMsg = signal<string | null>(null);
   public conceptoSeleccionado = signal<ConceptoCobro | null>(null);
 
+  public conceptosConAlerta = computed(() => {
+    const hoyStr = new Date().toISOString().split('T')[0];
+
+    return this.conceptos().map((con: any) => {
+      if (!con.fecha_vencimiento) return { ...con, vencido: false };
+
+      const venStr = con.fecha_vencimiento.split('T')[0];
+      return {
+        ...con,
+        vencido: venStr < hoyStr, 
+      };
+    });
+  });
+
   public conceptoForm = this.fb.group({
     nombre: ['', Validators.required],
     monto_efectivo: ['', [Validators.required, Validators.min(0)]],
     monto_transferencia: ['', [Validators.required, Validators.min(0)]],
     alcance: ['GRUPO', Validators.required],
     fecha_vencimiento: [''],
+  });
+
+  public actualizarForm = this.fb.group({
+    monto_efectivo: ['', [Validators.required, Validators.min(0)]],
+    monto_transferencia: ['', [Validators.required, Validators.min(0)]],
+    fecha_vencimiento: ['', Validators.required], 
   });
 
   ngOnInit() {
@@ -73,9 +93,7 @@ export class ConceptosPageComponent implements OnInit {
 
   guardar() {
     if (this.conceptoForm.invalid) return;
-
     this.guardando.set(true);
-
     const formValue = this.conceptoForm.value;
 
     const nuevoConcepto: Partial<ConceptoCobro> = {
@@ -83,7 +101,6 @@ export class ConceptosPageComponent implements OnInit {
       monto_efectivo: Number(formValue.monto_efectivo),
       monto_transferencia: Number(formValue.monto_transferencia),
       alcance: formValue.alcance as 'GRUPO' | 'MANADA' | 'UNIDAD' | 'CAMINANTES' | 'ROVERS',
-      // Si no pusieron fecha, mandamos undefined para que la base de datos ponga NULL
       fecha_vencimiento: formValue.fecha_vencimiento ? formValue.fecha_vencimiento : undefined,
     };
 
@@ -100,6 +117,51 @@ export class ConceptosPageComponent implements OnInit {
     });
   }
 
+  prepararActualizacion(concepto: any) {
+    this.conceptoSeleccionado.set(concepto);
+
+    const fechaLimpia = concepto.fecha_vencimiento ? concepto.fecha_vencimiento.split('T')[0] : '';
+
+    this.actualizarForm.patchValue({
+      monto_efectivo: concepto.monto_efectivo.toString(),
+      monto_transferencia: concepto.monto_transferencia.toString(),
+      fecha_vencimiento: fechaLimpia,
+    });
+
+    const modal = document.getElementById('modal_actualizar_precio') as HTMLDialogElement;
+    modal?.showModal();
+  }
+
+  confirmarActualizacion() {
+    if (this.actualizarForm.invalid) return;
+    const concepto = this.conceptoSeleccionado();
+    if (!concepto) return;
+
+    this.guardando.set(true);
+    const formValue = this.actualizarForm.value;
+
+    const datosNuevos = {
+      monto_efectivo: Number(formValue.monto_efectivo),
+      monto_transferencia: Number(formValue.monto_transferencia),
+      fecha_vencimiento: formValue.fecha_vencimiento,
+    };
+
+    this.conceptoService.actualizarPrecio(concepto.id_concepto, datosNuevos).subscribe({
+      next: () => {
+        this.guardando.set(false);
+        (document.getElementById('modal_actualizar_precio') as HTMLDialogElement)?.close();
+        this.exitoMsg.set(
+          `¡Se actualizó el valor y se ajustaron las deudas pendientes de ${concepto.nombre}!`,
+        );
+        this.cargarConceptos(true);
+      },
+      error: () => {
+        this.errorMsg.set('Hubo un error al intentar actualizar los precios.');
+        this.guardando.set(false);
+      },
+    });
+  }
+
   prepararBorrado(concepto: ConceptoCobro) {
     this.conceptoSeleccionado.set(concepto);
     const modal = document.getElementById('modal_borrar_concepto') as HTMLDialogElement;
@@ -109,26 +171,21 @@ export class ConceptosPageComponent implements OnInit {
   confirmarBorrado() {
     const concepto = this.conceptoSeleccionado();
     if (!concepto) return;
-
     this.cargando.set(true);
 
-    this.conceptoService.eliminarConcepto(concepto.id_concepto).subscribe({
+    this.conceptoService.archivarConcepto(concepto.id_concepto).subscribe({
       next: () => {
-        const modal = document.getElementById('modal_borrar_concepto') as HTMLDialogElement;
-        modal?.close();
-
+        (document.getElementById('modal_archivar_concepto') as HTMLDialogElement)?.close();
+        this.exitoMsg.set(`El concepto "${concepto.nombre}" fue ocultado exitosamente.`);
         this.cargarConceptos(true);
       },
       error: (err) => {
-        const modal = document.getElementById('modal_borrar_concepto') as HTMLDialogElement;
-        modal?.close();
+        (document.getElementById('modal_archivar_concepto') as HTMLDialogElement)?.close();
 
         if (err.status === 400) {
-          this.errorMsg.set(
-            'No podés borrar este concepto porque ya hay beneficiarios que lo deben.',
-          );
+          this.errorMsg.set(err.error?.message || 'No se puede ocultar, alguien debe plata.');
         } else {
-          this.errorMsg.set('Hubo un error al intentar eliminar el concepto.');
+          this.errorMsg.set('Hubo un error al intentar ocultar el concepto.');
         }
         this.cargando.set(false);
       },
@@ -151,20 +208,41 @@ export class ConceptosPageComponent implements OnInit {
 
     this.conceptoService.asignarConcepto(concepto.id_concepto).subscribe({
       next: (respuesta) => {
-        const modal = document.getElementById('modal_asignar_concepto') as HTMLDialogElement;
-        modal?.close();
-
+        (document.getElementById('modal_asignar_concepto') as HTMLDialogElement)?.close();
         this.cargando.set(false);
         this.exitoMsg.set(
           `¡Éxito! Se generaron ${respuesta.cantidad} nuevas deudas de "${concepto.nombre}".`,
         );
       },
       error: () => {
-        const modal = document.getElementById('modal_asignar_concepto') as HTMLDialogElement;
-        modal?.close();
-
+        (document.getElementById('modal_asignar_concepto') as HTMLDialogElement)?.close();
         this.cargando.set(false);
         this.errorMsg.set('Hubo un error al intentar asignar las deudas.');
+      },
+    });
+  }
+
+  archivarPagados() {
+    this.cargando.set(true);
+    this.errorMsg.set(null);
+    this.exitoMsg.set(null);
+
+    this.conceptoService.archivarPagados().subscribe({
+      next: (res) => {
+        if (res.cantidad > 0) {
+          this.exitoMsg.set(
+            `¡Limpieza exitosa! Se ocultaron ${res.cantidad} conceptos que ya estaban 100% pagados por todos.`,
+          );
+        } else {
+          this.errorMsg.set(
+            'No hay conceptos completamente pagados para archivar en este momento. Alguien todavía debe plata.',
+          );
+        }
+        this.cargarConceptos(true);
+      },
+      error: () => {
+        this.errorMsg.set('Error al intentar archivar los conceptos.');
+        this.cargando.set(false);
       },
     });
   }

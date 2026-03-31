@@ -23,10 +23,8 @@ import { ExportService } from '../../../../core/services/export.service';
 export class BeneficiariosTableComponent {
   private authService = inject(AuthService);
   private exportService = inject(ExportService);
-  // Recibe la lista desde la página
   beneficiarios = input<Beneficiario[]>([]);
 
-  // Emite un evento cuando tocan "Eliminar" pasándole el scout
   @Output() onEliminar = new EventEmitter<Beneficiario>();
   @Output() onAbrirCajero = new EventEmitter<Beneficiario>();
 
@@ -39,11 +37,9 @@ export class BeneficiariosTableComponent {
     const direction = this.sortDirection();
 
     return [...listaOriginal].sort((a, b) => {
-      // 2. Ahora TypeScript sabe que a[field] es válido porque field es keyof Beneficiario
       let valA = a[field];
       let valB = b[field];
 
-      // Convertimos a string para comparar sin importar mayúsculas
       const strA = (valA ?? '').toString().toLowerCase();
       const strB = (valB ?? '').toString().toLowerCase();
 

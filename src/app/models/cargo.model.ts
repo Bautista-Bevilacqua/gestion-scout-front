@@ -15,4 +15,5 @@ export interface Cargo {
   deuda_efectivo_restante?: number;
   deuda_transferencia_restante?: number;
   historial_pagos?: any[];
+  vencido?: boolean;
 }

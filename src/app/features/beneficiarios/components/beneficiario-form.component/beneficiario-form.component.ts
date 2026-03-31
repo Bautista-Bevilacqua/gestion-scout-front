@@ -25,12 +25,10 @@ import { CustomValidators } from '../../../../core/utils/custom-validators';
 export class FormularioBeneficiarioComponent implements OnChanges {
   private fb = inject(FormBuilder);
 
-  // Recibe datos de la página madre
   @Input() beneficiarioInicial: Beneficiario | null = null;
   @Input() familiaPrecargada: Familia | null = null;
   @Input() esEdicion: boolean = false;
 
-  // Emite el objeto listo para guardar
   @Output() onSubmit = new EventEmitter<Beneficiario>();
 
   public formEnviado = signal<boolean>(false);
@@ -44,7 +42,6 @@ export class FormularioBeneficiarioComponent implements OnChanges {
     rama_actual: ['Manada', Validators.required],
   });
 
-  // Si la página nos pasa un beneficiario para editar, llenamos el form
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['beneficiarioInicial'] && this.beneficiarioInicial) {
       this.beneficiarioForm.patchValue(this.beneficiarioInicial);
@@ -69,7 +66,6 @@ export class FormularioBeneficiarioComponent implements OnChanges {
       this.beneficiarioForm.markAllAsTouched();
       return;
     }
-    // Emitimos los datos limpios al padre
     this.onSubmit.emit(this.beneficiarioForm.getRawValue() as Beneficiario);
   }
 }

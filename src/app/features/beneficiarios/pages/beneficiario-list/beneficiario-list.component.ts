@@ -61,15 +61,14 @@ export class BeneficiarioListComponent implements OnInit {
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
       this.ramaSeleccionada.set(params.get('rama'));
-      this.cargarBeneficiarios(); // Pedimos los datos (que vendrán del caché si ya los tenemos)
+      this.cargarBeneficiarios(); 
     });
   }
 
   cargarBeneficiarios(forzarRecarga: boolean = false) {
     this.cargando.set(true);
-    this.error.set(null); // Limpiamos errores previos por si acaso
+    this.error.set(null); 
 
-    // Le pasamos el "forzarRecarga" al servicio que creamos recién
     this.beneficiarioService.getBeneficiarios(forzarRecarga).subscribe({
       next: (data) => {
         this.beneficiarios.set(data);

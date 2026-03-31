@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
-// 👇 Importamos los validadores
 import { CustomValidators } from '../../../../core/utils/custom-validators';
 
 @Component({
@@ -20,31 +19,27 @@ export class CambiarPasswordPageComponent {
   public errorMsg = signal<string | null>(null);
   public guardando = signal(false);
 
-  // 👇 La banderita para no molestar al usuario mientras escribe
   public formEnviado = signal<boolean>(false);
 
-  // 👇 El formulario con las nuevas reglas
   public passForm = this.fb.group(
     {
       nueva: ['', [Validators.required, CustomValidators.passwordFuerte]],
       confirmacion: ['', [Validators.required]],
     },
     {
-      // Acá va el validador que compara ambos campos
       validators: [CustomValidators.passwordsIguales('nueva', 'confirmacion')],
     },
   );
 
-  // 👇 La misma función inteligente del Login
   campoEsInvalido(campo: string): boolean {
     const control = this.passForm.get(campo);
     return !!(control && control.invalid && this.formEnviado());
   }
 
   guardar() {
-    this.formEnviado.set(true); // Levanta la bandera al hacer clic
+    this.formEnviado.set(true); 
 
-    if (this.passForm.invalid) return; // Si hay errores, no avanza
+    if (this.passForm.invalid) return; 
 
     const { nueva } = this.passForm.value;
 

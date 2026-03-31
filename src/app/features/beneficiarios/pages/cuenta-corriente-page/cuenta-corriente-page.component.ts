@@ -8,11 +8,12 @@ import { Cargo } from '../../../../models/cargo.model';
 import { Beneficiario } from '../../../../models/beneficiario.model';
 import { ConceptoCobro } from '../../../../models/concepto-cobro.model';
 import { ConfirmarPagoModalComponent } from '../../../../shared/components/confirmar-pago-modal/confirmar-pago.modal.component';
+import { ConfirmModalComponent } from "../../../../shared/components/confirm-modal/confirm-modal.component";
 
 @Component({
   selector: 'app-cuenta-corriente-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, ConfirmarPagoModalComponent],
+  imports: [CommonModule, RouterLink, ConfirmarPagoModalComponent, ConfirmModalComponent],
   templateUrl: './cuenta-corriente-page.component.html',
 })
 export class CuentaCorrientePageComponent implements OnInit {
@@ -26,10 +27,10 @@ export class CuentaCorrientePageComponent implements OnInit {
   public conceptosDisponibles = signal<ConceptoCobro[]>([]);
   public cargando = signal(true);
   public deudaTotal = signal(0);
+  public cargoABorrar = signal<any | null>(null);
 
   public seleccionados = signal<Set<number>>(new Set());
 
-  // MATEMÁTICA CORREGIDA: Sumamos solo lo que FALTA pagar
   public totalSeleccionadoEfectivo = computed(() => {
     return this.cargos()
       .filter((c) => this.seleccionados().has(c.id_cargo))
@@ -87,7 +88,6 @@ export class CuentaCorrientePageComponent implements OnInit {
 
     this.cargoService.getCargosPorBeneficiario(id).subscribe({
       next: (data) => {
-        // Hacemos la matemática acá para que el HTML no sufra
         const dataNumerica = data.map((c) => {
           const pagado = Number(c.total_pagado || 0);
           const efvo = Number(c.monto_efectivo);
@@ -98,7 +98,6 @@ export class CuentaCorrientePageComponent implements OnInit {
             monto_efectivo: efvo,
             monto_transferencia: transf,
             total_pagado: pagado,
-            // Guardamos la resta ya lista para usar
             deuda_efectivo_restante: efvo - pagado,
             deuda_transferencia_restante: transf - pagado,
           };
@@ -133,7 +132,6 @@ export class CuentaCorrientePageComponent implements OnInit {
   prepararCobro(cargo: Cargo) {
     this.seleccionados.set(new Set([cargo.id_cargo]));
 
-    // Le pasamos la deuda real y un flag indicando que es pago individual (permite parciales)
     this.cargoAAsignar.set({
       ...cargo,
       es_multiple: false,
@@ -146,8 +144,6 @@ export class CuentaCorrientePageComponent implements OnInit {
   prepararCobroMultiple() {
     if (this.seleccionados().size === 0) return;
 
-    // MAGIA DE UX: Si seleccionó 1 solo elemento desde el checkbox,
-    // lo mandamos al flujo de "Pago Individual" para que le aparezca el input.
     if (this.seleccionados().size === 1) {
       const idUnico = Array.from(this.seleccionados())[0];
       const cargoUnico = this.cargos().find((c) => c.id_cargo === idUnico);
@@ -157,7 +153,6 @@ export class CuentaCorrientePageComponent implements OnInit {
       }
     }
 
-    // Si seleccionó 2 o más, va al flujo de "Carrito Múltiple" (sin input)
     this.cargoAAsignar.set({
       es_multiple: true,
       concepto_nombre: `${this.seleccionados().size} conceptos seleccionados`,
@@ -172,13 +167,40 @@ export class CuentaCorrientePageComponent implements OnInit {
     modal?.showModal();
   }
 
+  prepararBorradoCargo(cargo: Cargo) {
+    this.cargoABorrar.set(cargo);
+    const modal = document.getElementById('modal_borrar_cargo') as HTMLDialogElement;
+    modal?.showModal();
+  }
+
+  confirmarBorradoCargo() {
+    const cargo = this.cargoABorrar();
+    const idBeneficiario = this.beneficiario()?.id_beneficiario;
+    if (!cargo || !idBeneficiario) return;
+
+    this.procesandoPago.set(true); 
+
+    this.cargoService.eliminarCargo(cargo.id_cargo).subscribe({
+      next: () => {
+        (document.getElementById('modal_borrar_cargo') as HTMLDialogElement)?.close();
+        this.cargoABorrar.set(null);
+        this.procesandoPago.set(false);
+        this.cargarDatos(idBeneficiario);
+      },
+      error: (err: any) => {
+        (document.getElementById('modal_borrar_cargo') as HTMLDialogElement)?.close();
+        this.procesandoPago.set(false);
+        alert(err.error?.message || 'Error al intentar quitar la deuda.');
+      },
+    });
+  }
+
   cerrarModalCobro() {
     const modal = document.getElementById('modal_confirmar_pago') as HTMLDialogElement;
     modal?.close();
     this.cargoAAsignar.set(null);
   }
 
-  // Ahora recibe un objeto { metodo: string, monto: number } desde el modal
   ejecutarPago(eventoPagos: any) {
     const ids = Array.from(this.seleccionados());
     const idBeneficiario = this.beneficiario()?.id_beneficiario;
@@ -190,17 +212,14 @@ export class CuentaCorrientePageComponent implements OnInit {
     const metodo = typeof eventoPagos === 'string' ? eventoPagos : eventoPagos.metodo;
     const montoParcial = typeof eventoPagos === 'string' ? undefined : eventoPagos.monto;
 
-    // 1. PAGO MÚLTIPLE (Paga todo el resto de lo seleccionado)
     if (this.cargoAAsignar()?.es_multiple) {
       this.cargoService.pagarMultiplesCargos(ids, metodo).subscribe({
         next: () => this.finalizarPagoExitosa(idBeneficiario),
         error: (err: any) => this.manejarErrorPago(err),
       });
     } else {
-      // 2. PAGO INDIVIDUAL
       const idCargo = ids[0];
 
-      // PARCHE: Si no es parcial, miramos qué método tocó para saber cuánta era la deuda total correcta
       const deudaTotalSegunMetodo =
         metodo === 'EFECTIVO'
           ? this.cargoAAsignar()?.deuda_efectivo

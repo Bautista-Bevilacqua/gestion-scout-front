@@ -31,7 +31,6 @@ export class BeneficiarioFormComponent implements OnInit {
   public cargando = signal<boolean>(false);
   public errorMsg = signal<string | null>(null);
 
-  // Datos para pasarle al formulario tonto
   public scoutPrecargado = signal<Beneficiario | null>(null);
   public familiaPrecargada = signal<Familia | null>(null);
 
@@ -47,7 +46,6 @@ export class BeneficiarioFormComponent implements OnInit {
   cargarDatos(id: number) {
     this.beneficiarioService.getBeneficiarioById(id).subscribe({
       next: (data) => {
-        // Formateamos la fecha antes de mandarla al form
         const fechaFormateada = new Date(data.fecha_nacimiento).toISOString().split('T')[0];
         const scoutListo = { ...data, fecha_nacimiento: fechaFormateada };
         this.scoutPrecargado.set(scoutListo);
@@ -63,7 +61,6 @@ export class BeneficiarioFormComponent implements OnInit {
     });
   }
 
-  // Se ejecuta cuando el Formulario Tonto emite el evento "onSubmit"
   procesarGuardado(datos: Beneficiario) {
     this.cargando.set(true);
     this.errorMsg.set(null);

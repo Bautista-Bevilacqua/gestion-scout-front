@@ -6,6 +6,15 @@
     </div>
     <div class="flex gap-2">
       <button class="btn btn-ghost" (click)="cargarConceptos(true)">↻ Refrescar</button>
+
+      <button
+        class="btn btn-outline btn-secondary"
+        (click)="archivarPagados()"
+        title="Ocultar conceptos 100% pagados"
+      >
+        🧹 Limpiar Pagados
+      </button>
+
       <button class="btn btn-outline btn-primary" (click)="modalCuotas.abrir()">
         📅 Generar Cuotas
       </button>
@@ -37,14 +46,21 @@
           </tr>
         </thead>
         <tbody>
-          @for (c of conceptos(); track c.id_concepto) {
-            <tr class="hover">
-              <td class="font-bold">{{ c.nombre }}</td>
+          @for (c of conceptosConAlerta(); track c.id_concepto) {
+            <tr class="hover" [ngClass]="{ 'bg-error/10': c.vencido }">
+              <td class="font-bold">
+                {{ c.nombre }}
+                @if (c.vencido) {
+                  <span class="badge badge-error badge-sm ml-2 animate-pulse font-bold"
+                    >VENCIDO</span
+                  >
+                }
+              </td>
               <td class="text-success font-medium">${{ c.monto_efectivo }}</td>
               <td class="text-info font-medium">${{ c.monto_transferencia }}</td>
               <td>
                 <div
-                  class="badge badge-outline"
+                  class="badge badge-outline font-bold"
                   [class.badge-primary]="c.alcance === 'GRUPO'"
                   [class.badge-warning]="c.alcance === 'MANADA'"
                   [class.badge-success]="c.alcance === 'UNIDAD'"
@@ -54,27 +70,40 @@
                   {{ c.alcance }}
                 </div>
               </td>
-              <td>
+              <td [ngClass]="{ 'text-error font-bold': c.vencido }">
                 {{ c.fecha_vencimiento ? (c.fecha_vencimiento | date: 'dd/MM/yyyy') : 'Sin vto.' }}
               </td>
               <td class="text-center">
                 <div class="flex justify-center gap-2">
+                  @if (c.vencido) {
+                    <button
+                      class="btn btn-sm btn-error shadow-sm"
+                      (click)="prepararActualizacion(c)"
+                      title="Actualizar precio retroactivo"
+                    >
+                      ⚠️ Actualizar Precio
+                    </button>
+                  } @else {
+                    <button
+                      class="btn btn-sm btn-outline btn-success"
+                      (click)="prepararAsignacion(c)"
+                      title="Generar deudas a beneficiarios"
+                    >
+                      💵 Asignar
+                    </button>
+                  }
                   <button
-                    class="btn btn-sm btn-outline btn-success"
-                    (click)="prepararAsignacion(c)"
-                    title="Generar deudas a beneficiarios"
+                    class="btn btn-sm btn-ghost text-error opacity-70 hover:opacity-100"
+                    (click)="prepararBorrado(c)"
                   >
-                    💵 Asignar
-                  </button>
-                  <button class="btn btn-sm btn-ghost text-error" (click)="prepararBorrado(c)">
-                    Eliminar
+                    🗑️
                   </button>
                 </div>
               </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="5" class="text-center py-8 text-base-content/50">
+              <td colspan="6" class="text-center py-8 text-base-content/50">
                 No hay conceptos de cobro registrados.
               </td>
             </tr>
@@ -88,7 +117,6 @@
 <dialog id="modal_nuevo_concepto" class="modal">
   <div class="modal-box">
     <h3 class="font-bold text-xl mb-6">Crear Nuevo Concepto</h3>
-
     <form [formGroup]="conceptoForm" (ngSubmit)="guardar()" class="flex flex-col gap-4">
       <label class="form-control w-full">
         <div class="label"><span class="label-text font-bold">Nombre del Concepto</span></div>
@@ -99,7 +127,6 @@
           placeholder="Ej: Cuota Junio 2024"
         />
       </label>
-
       <div class="grid grid-cols-2 gap-4">
         <label class="form-control w-full">
           <div class="label"><span class="label-text font-bold">Efectivo ($)</span></div>
@@ -110,7 +137,6 @@
             placeholder="Ej: 5000"
           />
         </label>
-
         <label class="form-control w-full">
           <div class="label"><span class="label-text font-bold">MP / Transf. ($)</span></div>
           <input
@@ -120,7 +146,6 @@
             placeholder="Ej: 5500"
           />
         </label>
-
         <label class="form-control w-full">
           <div class="label"><span class="label-text font-bold">Alcance</span></div>
           <select formControlName="alcance" class="select select-bordered w-full">
@@ -132,7 +157,6 @@
           </select>
         </label>
       </div>
-
       <label class="form-control w-full">
         <div class="label">
           <span class="label-text font-bold">Fecha de Vencimiento</span>
@@ -144,7 +168,6 @@
           class="input input-bordered w-full"
         />
       </label>
-
       <div class="modal-action mt-6">
         <button type="button" class="btn" (click)="cerrarModal()">Cancelar</button>
         <button
@@ -153,6 +176,70 @@
           [disabled]="conceptoForm.invalid || guardando()"
         >
           {{ guardando() ? 'Guardando...' : 'Crear Concepto' }}
+        </button>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+
+<dialog id="modal_actualizar_precio" class="modal">
+  <div class="modal-box border-t-4 border-warning">
+    <h3 class="font-bold text-2xl mb-2 text-warning">Actualizar Valor</h3>
+    <p class="font-bold text-lg mb-4">{{ conceptoSeleccionado()?.nombre }}</p>
+
+    <div class="bg-warning/10 p-4 rounded-xl mb-6">
+      <p class="text-sm">
+        Al confirmar, <strong>se actualizará automáticamente la deuda</strong> de todos los
+        beneficiarios que aún deban este concepto o lo hayan pagado parcialmente.
+      </p>
+    </div>
+
+    <form
+      [formGroup]="actualizarForm"
+      (ngSubmit)="confirmarActualizacion()"
+      class="flex flex-col gap-4"
+    >
+      <div class="grid grid-cols-2 gap-4">
+        <label class="form-control w-full">
+          <div class="label"><span class="label-text font-bold">Nuevo Efvo ($)</span></div>
+          <input
+            type="number"
+            formControlName="monto_efectivo"
+            class="input input-bordered w-full focus:input-warning"
+          />
+        </label>
+        <label class="form-control w-full">
+          <div class="label"><span class="label-text font-bold">Nuevo MP/Transf ($)</span></div>
+          <input
+            type="number"
+            formControlName="monto_transferencia"
+            class="input input-bordered w-full focus:input-warning"
+          />
+        </label>
+      </div>
+
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text font-bold">Patear Vencimiento hasta:</span>
+        </div>
+        <input
+          type="date"
+          formControlName="fecha_vencimiento"
+          class="input input-bordered w-full focus:input-warning"
+        />
+      </label>
+
+      <div class="modal-action mt-6">
+        <button type="button" class="btn" onclick="modal_actualizar_precio.close()">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-warning shadow-md"
+          [disabled]="actualizarForm.invalid || guardando()"
+        >
+          {{ guardando() ? 'Aplicando cambios...' : 'Confirmar Aumento' }}
         </button>
       </div>
     </form>

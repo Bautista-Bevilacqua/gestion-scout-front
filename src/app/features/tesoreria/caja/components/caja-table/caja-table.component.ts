@@ -7,7 +7,7 @@ import { ExportService } from '../../../../../core/services/export.service';
   selector: 'app-caja-table',
   standalone: true,
   imports: [CommonModule],
-  providers: [DatePipe], // Para formatear la fecha lindo en el HTML
+  providers: [DatePipe], 
   templateUrl: './caja-table.component.html',
 })
 export class CajaTableComponent {
@@ -17,7 +17,7 @@ export class CajaTableComponent {
   movimientos = input.required<MovimientoCaja[]>();
 
   public sortField = signal<keyof MovimientoCaja>('fecha');
-  public sortDirection = signal<'asc' | 'desc'>('desc'); // Por defecto, los más nuevos arriba
+  public sortDirection = signal<'asc' | 'desc'>('desc'); 
 
   public movimientosOrdenados = computed(() => {
     const lista = this.movimientos();
@@ -28,17 +28,14 @@ export class CajaTableComponent {
       let valA: any = a[field];
       let valB: any = b[field];
 
-      // Lógica especial para fechas
       if (field === 'fecha') {
         valA = new Date(a.fecha).getTime();
         valB = new Date(b.fecha).getTime();
       }
-      // Lógica especial para números (monto)
       else if (field === 'monto') {
         valA = Number(a.monto);
         valB = Number(b.monto);
       }
-      // Lógica para textos
       else {
         valA = (valA || '').toString().toLowerCase();
         valB = (valB || '').toString().toLowerCase();
@@ -61,7 +58,6 @@ export class CajaTableComponent {
 
   descargarExcel() {
     const datosParaExcel = this.movimientosOrdenados().map((m) => {
-      // Juntamos la data del responsable en un solo texto legible
       const responsable = m.persona_involucrada
         ? `${m.persona_involucrada} (Sist: ${m.usuario_nombre || 'Auto'})`
         : `Sist: ${m.usuario_nombre || 'Automático'}`;
@@ -72,14 +68,13 @@ export class CajaTableComponent {
         Concepto: m.concepto,
         Responsable: responsable,
         Comprobante: m.comprobante ? 'Sí' : 'No',
-        Monto: Number(m.monto), // Forzamos a número para que Excel lo sume bien
+        Monto: Number(m.monto), 
       };
     });
 
     this.exportService.exportarExcel(datosParaExcel, 'Movimientos_Caja_Grupo108');
   }
 
-  // 👇 FUNCIÓN PARA PDF
   descargarPDF() {
     const columnas = ['Fecha', 'Tipo', 'Concepto', 'Responsable', 'Comprobante', 'Monto'];
 
@@ -94,7 +89,7 @@ export class CajaTableComponent {
         m.concepto,
         responsable,
         m.comprobante ? 'Sí' : '-',
-        `$ ${Number(m.monto).toLocaleString('es-AR')}`, // Formato plata: $ 1.500
+        `$ ${Number(m.monto).toLocaleString('es-AR')}`, 
       ];
     });
 

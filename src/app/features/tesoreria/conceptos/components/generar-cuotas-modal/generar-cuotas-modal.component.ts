@@ -13,7 +13,6 @@ export class GenerarCuotasModalComponent {
   private fb = inject(FormBuilder);
   private conceptoService = inject(ConceptoService);
 
-  // Avisamos a la página cuando terminamos para que refresque la tabla
   onFinalizado = output<void>();
 
   public guardando = signal(false);
@@ -35,10 +34,10 @@ export class GenerarCuotasModalComponent {
   public cuotasForm = this.fb.group({
     meses: [[] as string[], [Validators.required, Validators.minLength(1)]],
     anio: [new Date().getFullYear(), [Validators.required, Validators.min(2024)]],
-    monto_efectivo: ['', [Validators.required, Validators.min(0)]], 
+    monto_efectivo: ['', [Validators.required, Validators.min(0)]],
     monto_transferencia: ['', [Validators.required, Validators.min(0)]],
     alcance: ['GRUPO', Validators.required],
-    fecha_vencimiento: [''],
+    fecha_vencimiento: ['', Validators.required],
   });
 
   abrir() {

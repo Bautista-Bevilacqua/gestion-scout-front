@@ -8,7 +8,6 @@ import saveAs from 'file-saver';
   providedIn: 'root',
 })
 export class ExportService {
-  // 🟢 EXPORTAR EXCEL
   exportarExcel(datos: any[], nombreArchivo: string) {
     if (!datos || datos.length === 0) return;
 
@@ -23,7 +22,6 @@ export class ExportService {
 
     worksheet.addRows(datos);
 
-    // 1. PINTAR CABECERA
     const headerRow = worksheet.getRow(1);
     headerRow.height = 25;
 
@@ -40,20 +38,16 @@ export class ExportService {
       };
     }
 
-    // Averiguamos en qué columna está el "Tipo" (para saber si es Ingreso/Egreso)
     const indiceTipo = nombresColumnas.indexOf('Tipo') + 1;
 
-    // 2. DAR FORMATO A LOS DATOS
     worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
       if (rowNumber > 1) {
-        // A) Definir el color base de TODA LA FILA
-        let colorFondoFila = rowNumber % 2 === 0 ? 'FFF2F2F2' : 'FFFFFFFF'; // Cebra por defecto
+        let colorFondoFila = rowNumber % 2 === 0 ? 'FFF2F2F2' : 'FFFFFFFF';
 
-        // Si existe la columna Tipo, nos fijamos qué dice en esta fila
         if (indiceTipo > 0) {
           const tipoMovimiento = row.getCell(indiceTipo).value?.toString() || '';
-          if (tipoMovimiento === 'INGRESO') colorFondoFila = 'FFE2EFDA'; // Verde pastel
-          if (tipoMovimiento === 'EGRESO') colorFondoFila = 'FFFCE4D6'; // Rojo pastel
+          if (tipoMovimiento === 'INGRESO') colorFondoFila = 'FFE2EFDA';
+          if (tipoMovimiento === 'EGRESO') colorFondoFila = 'FFFCE4D6';
         }
 
         for (let i = 1; i <= nombresColumnas.length; i++) {
@@ -68,7 +62,6 @@ export class ExportService {
             right: { style: 'thin' },
           };
 
-          // B) Arreglar Fechas
           if (nombreColumna === 'Fecha Nac.' || nombreColumna === 'Fecha') {
             const fechaStr = cell.value?.toString() || '';
             if (fechaStr.includes('T') && fechaStr.includes('-')) {
@@ -77,21 +70,17 @@ export class ExportService {
             }
           }
 
-          // C) Forzar Números
           if (nombreColumna === 'DNI' && cell.value) {
             cell.value = Number(cell.value);
             cell.numFmt = '#,##0';
           }
 
-          // 👇 D) Forzar Moneda
           if (nombreColumna === 'Monto' && cell.value !== null) {
             cell.value = Number(cell.value);
-            cell.numFmt = '"$" #,##0.00'; // Formato contable oficial
+            cell.numFmt = '"$" #,##0.00';
           }
 
-          // E) Color de fondo de la celda
           let colorCelda = colorFondoFila;
-          // Si justo esta columna es "Rama", pisa el color de la fila con el de la rama
           if (nombreColumna === 'Rama' && cell.value) {
             const rama = cell.value.toString();
             if (rama === 'Manada') colorCelda = 'FFFFF2CC';
@@ -105,12 +94,10 @@ export class ExportService {
       }
     });
 
-    // 3. AUTO-AJUSTAR ANCHO DE COLUMNAS
     for (let i = 1; i <= nombresColumnas.length; i++) {
       let maxLength = 0;
       const column = worksheet.getColumn(i);
       column.eachCell({ includeEmpty: true }, (cell) => {
-        // Al calcular el ancho, si es formato moneda sumamos caracteres extra
         let texto = cell.value ? cell.value.toString() : '';
         if (cell.numFmt === '"$" #,##0.00') texto = '$ 000.000,00';
 
@@ -127,7 +114,6 @@ export class ExportService {
     });
   }
 
-  // 🔴 EXPORTAR A PDF
   exportarPDF(columnas: string[], datos: any[][], nombreArchivo: string, tituloReporte: string) {
     const doc = new jsPDF('p', 'mm', 'a4');
 
@@ -158,18 +144,15 @@ export class ExportService {
       headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
       didParseCell: (data) => {
         if (data.section === 'body') {
-          // Color base (Cebra)
           let colorFondo: [number, number, number] =
             data.row.index % 2 === 0 ? [242, 242, 242] : [255, 255, 255];
 
-          // 👇 Si hay columna "Tipo" (Caja), pintamos toda la fila
           if (indiceTipo !== -1) {
             const tipo = (data.row.raw as any[])[indiceTipo];
-            if (tipo === 'INGRESO') colorFondo = [226, 239, 218]; // Verde pastel
-            if (tipo === 'EGRESO') colorFondo = [252, 228, 214]; // Rojo pastel
+            if (tipo === 'INGRESO') colorFondo = [226, 239, 218];
+            if (tipo === 'EGRESO') colorFondo = [252, 228, 214];
           }
 
-          // Si hay columna "Rama", pintamos solo esa celda
           if (indiceRama !== -1 && data.column.index === indiceRama) {
             const rama = (data.row.raw as any[])[indiceRama];
             if (rama === 'Manada') colorFondo = [255, 242, 204];

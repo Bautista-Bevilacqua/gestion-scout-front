@@ -57,7 +57,6 @@ export class CajaPageComponent implements OnInit {
   }
 
   filtrarHoy() {
-    // Genera la fecha actual en formato YYYY-MM-DD
     const hoy = new Date().toISOString().split('T')[0];
 
     this.fechaDesde.set(hoy);
@@ -67,11 +66,9 @@ export class CajaPageComponent implements OnInit {
 
   filtrarEsteMes() {
     const fecha = new Date();
-    // Día 1 del mes actual
     const primerDia = new Date(fecha.getFullYear(), fecha.getMonth(), 1)
       .toISOString()
       .split('T')[0];
-    // Día 0 del mes siguiente = Último día del mes actual
     const ultimoDia = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0)
       .toISOString()
       .split('T')[0];
@@ -83,7 +80,6 @@ export class CajaPageComponent implements OnInit {
 
   filtrarEsteAnio() {
     const anio = new Date().getFullYear();
-    // Del 1 de enero al 31 de diciembre del año en curso
     this.fechaDesde.set(`${anio}-01-01`);
     this.fechaHasta.set(`${anio}-12-31`);
     this.cargarCaja();

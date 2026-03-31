@@ -89,6 +89,7 @@
                   <th>Concepto</th>
                   <th>Vencimiento</th>
                   <th>Montos (Efvo / MP)</th>
+                  <th class="w-16 text-center">Acción</th>
                 </tr>
               </thead>
               <tbody>
@@ -101,6 +102,7 @@
                           class="checkbox checkbox-primary"
                           [checked]="seleccionados().has(c.id_cargo)"
                           (change)="toggleSeleccion(c.id_cargo)"
+                          [disabled]="c.vencido"
                         />
                       </td>
                       <td>
@@ -110,13 +112,27 @@
                             @if (c.estado === 'PARCIAL') {
                               <div class="badge badge-warning badge-sm">Parcial</div>
                             }
+                            @if (c.vencido) {
+                              <div class="badge badge-error badge-sm animate-pulse">Vencido</div>
+                            }
                           </span>
-                          <button
-                            class="text-xs text-primary font-bold text-left opacity-0 group-hover:opacity-100 transition-opacity"
-                            (click)="prepararCobro(c)"
-                          >
-                            Cobrar (Total o Parcial)
-                          </button>
+
+                          @if (!c.vencido) {
+                            <div class="mt-1">
+                              <button
+                                class="text-xs text-primary font-bold text-left opacity-0 group-hover:opacity-100 transition-opacity"
+                                (click)="prepararCobro(c)"
+                              >
+                                Cobrar (Total o Parcial)
+                              </button>
+                            </div>
+                          } @else {
+                            <span
+                              class="text-[10px] text-error font-bold leading-tight mt-1 opacity-80"
+                            >
+                              Actualizar precio en Tesorería
+                            </span>
+                          }
                         </div>
                       </td>
                       <td>{{ c.fecha_vencimiento | date: 'dd/MM/yyyy' }}</td>
@@ -144,11 +160,23 @@
                           }
                         </div>
                       </td>
+
+                      <td class="text-center">
+                        @if (c.estado === 'PENDIENTE') {
+                          <button
+                            class="btn btn-square btn-outline btn-error btn-sm opacity-40 group-hover:opacity-100 transition-all shadow-sm"
+                            (click)="prepararBorradoCargo(c)"
+                            title="Desasociar deuda"
+                          >
+                            <span class="text-lg">🗑️</span>
+                          </button>
+                        }
+                      </td>
                     </tr>
                   }
                 } @empty {
                   <tr>
-                    <td colspan="4" class="text-center py-12 opacity-50 text-xl italic font-medium">
+                    <td colspan="5" class="text-center py-12 opacity-50 text-xl italic font-medium">
                       ¡No tiene deudas! El chico está al día. 🏕️
                     </td>
                   </tr>
@@ -245,3 +273,16 @@
   (onConfirmar)="ejecutarPago($event)"
   (onCerrar)="cerrarModalCobro()"
 ></app-confirmar-pago-modal>
+
+<app-confirm-modal
+  modalId="modal_borrar_cargo"
+  titulo="¿Quitar deuda asignada?"
+  [mensaje]="
+    'Estás por eliminar la deuda <strong>' +
+    (cargoABorrar()?.concepto_nombre || '') +
+    '</strong> de la cuenta de este beneficiario.<br><br>¿Estás seguro?'
+  "
+  textoBoton="Sí, quitar deuda"
+  (confirmar)="confirmarBorradoCargo()"
+>
+</app-confirm-modal>
