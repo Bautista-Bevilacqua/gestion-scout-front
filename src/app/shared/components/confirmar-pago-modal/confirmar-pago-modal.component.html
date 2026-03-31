@@ -3,48 +3,108 @@
     <h3 class="font-bold text-2xl mb-4 text-center">Registrar Pago</h3>
 
     @if (cargo()) {
-      <div class="bg-base-200 p-4 rounded-lg mb-6 text-center">
-        <p class="text-sm opacity-70">Estás cobrando:</p>
-        <p class="text-xl font-bold">{{ cargo()?.concepto_nombre }}</p>
+      <div class="bg-base-200 p-4 rounded-lg mb-6 text-center shadow-inner">
+        <p class="text-sm opacity-70 uppercase font-bold tracking-wider">Estás cobrando:</p>
+        <p class="text-xl font-black text-primary">{{ cargo()?.concepto_nombre }}</p>
       </div>
 
-      <p class="font-bold mb-3 text-center text-lg">Seleccioná el método de pago:</p>
+      @if (!cargo()?.es_multiple) {
+        <div
+          class="form-control w-full max-w-sm mx-auto mb-8 bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm"
+        >
+          <label class="cursor-pointer label">
+            <span class="label-text font-bold text-lg">¿Es un pago parcial?</span>
+            <input
+              type="checkbox"
+              class="toggle toggle-primary"
+              [checked]="esPagoParcial()"
+              (change)="esPagoParcial.set(!esPagoParcial())"
+            />
+          </label>
+
+          @if (esPagoParcial()) {
+            <div class="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <label class="label justify-center pb-2">
+                <span class="label-text font-bold opacity-70">Monto a abonar:</span>
+              </label>
+              <div class="flex items-center gap-3">
+                <span class="text-4xl font-black text-success">$</span>
+                <input
+                  type="number"
+                  class="input input-bordered input-lg w-full font-black text-2xl focus:input-primary"
+                  [ngModel]="montoAbonado()"
+                  (ngModelChange)="montoAbonado.set($event)"
+                  placeholder="Ej: 2500"
+                  min="1"
+                />
+              </div>
+            </div>
+          }
+
+          <div
+            class="flex justify-between mt-4 px-1 text-xs font-bold opacity-60 border-t border-base-200 pt-3"
+          >
+            <span>Deuda Efvo: ${{ cargo()?.deuda_efectivo }}</span>
+            <span>Deuda MP: ${{ cargo()?.deuda_transferencia }}</span>
+          </div>
+        </div>
+      }
+
+      <p class="font-bold mb-4 text-center text-lg">¿Con qué método lo paga?</p>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
-          class="btn btn-outline btn-success flex flex-col h-auto py-4 gap-1"
-          [disabled]="procesando()"
+          class="btn btn-outline btn-success flex flex-col h-auto py-4 gap-2 hover:scale-[1.02] transition-transform"
+          [disabled]="procesando() || (!cargo()?.es_multiple && esPagoParcial() && !montoAbonado())"
           (click)="confirmar('EFECTIVO')"
         >
-          <span class="text-3xl">💵</span>
-          <span class="text-sm uppercase font-bold">Efectivo</span>
-          <span class="text-2xl font-black">${{ cargo()?.monto_efectivo }}</span>
+          <span class="text-4xl drop-shadow-sm">💵</span>
+          <span class="text-sm uppercase font-black">Efectivo</span>
+          @if (cargo()?.es_multiple || !esPagoParcial()) {
+            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full">
+              ${{ cargo()?.es_multiple ? cargo()?.monto_efectivo : cargo()?.deuda_efectivo }}
+            </span>
+          }
         </button>
 
         <button
-          class="btn btn-outline btn-info flex flex-col h-auto py-4 gap-1"
-          [disabled]="procesando()"
+          class="btn btn-outline btn-info flex flex-col h-auto py-4 gap-2 hover:scale-[1.02] transition-transform"
+          [disabled]="procesando() || (!cargo()?.es_multiple && esPagoParcial() && !montoAbonado())"
           (click)="confirmar('MERCADOPAGO')"
         >
-          <span class="text-3xl">📱</span>
-          <span class="text-sm uppercase font-bold">Mercado Pago</span>
-          <span class="text-2xl font-black">${{ cargo()?.monto_transferencia }}</span>
+          <span class="text-4xl drop-shadow-sm">📱</span>
+          <span class="text-sm uppercase font-black">Mercado Pago</span>
+          @if (cargo()?.es_multiple || !esPagoParcial()) {
+            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full">
+              ${{
+                cargo()?.es_multiple ? cargo()?.monto_transferencia : cargo()?.deuda_transferencia
+              }}
+            </span>
+          }
         </button>
 
         <button
-          class="btn btn-outline btn-warning flex flex-col h-auto py-4 gap-1"
-          [disabled]="procesando()"
+          class="btn btn-outline btn-warning flex flex-col h-auto py-4 gap-2 hover:scale-[1.02] transition-transform"
+          [disabled]="procesando() || (!cargo()?.es_multiple && esPagoParcial() && !montoAbonado())"
           (click)="confirmar('TRANSFERENCIA')"
         >
-          <span class="text-3xl">🏦</span>
-          <span class="text-sm uppercase font-bold">Transferencia</span>
-          <span class="text-2xl font-black">${{ cargo()?.monto_transferencia }}</span>
+          <span class="text-4xl drop-shadow-sm">🏦</span>
+          <span class="text-sm uppercase font-black">Transferencia</span>
+          @if (cargo()?.es_multiple || !esPagoParcial()) {
+            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full">
+              ${{
+                cargo()?.es_multiple ? cargo()?.monto_transferencia : cargo()?.deuda_transferencia
+              }}
+            </span>
+          }
         </button>
       </div>
     }
 
-    <div class="modal-action mt-6">
-      <button class="btn btn-ghost" (click)="cerrar()" [disabled]="procesando()">Cancelar</button>
+    <div class="modal-action mt-6 border-t border-base-200 pt-4">
+      <button class="btn btn-ghost w-full sm:w-auto" (click)="cerrar()" [disabled]="procesando()">
+        Cancelar
+      </button>
     </div>
   </div>
   <form method="dialog" class="modal-backdrop"><button (click)="cerrar()">close</button></form>

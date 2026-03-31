@@ -1,24 +1,51 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Cargo } from '../../../models/cargo.model';
 
 @Component({
   selector: 'app-confirmar-pago-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './confirmar-pago-modal.component.html',
 })
 export class ConfirmarPagoModalComponent {
-  // Recibimos el cargo a cobrar y si el sistema está "pensando"
-  cargo = input<Partial<Cargo> | null>(null);
+  cargo = input<any | null>(null);
   procesando = input<boolean>(false);
 
-  // Avisamos a la página qué decidió el usuario (sumamos TRANSFERENCIA)
-  onConfirmar = output<'EFECTIVO' | 'MERCADOPAGO' | 'TRANSFERENCIA'>();
+  onConfirmar = output<{ metodo: string; monto?: number }>();
   onCerrar = output<void>();
 
-  confirmar(metodo: 'EFECTIVO' | 'MERCADOPAGO' | 'TRANSFERENCIA') {
-    this.onConfirmar.emit(metodo);
+  montoAbonado = signal<number | null>(null);
+  esPagoParcial = signal<boolean>(false); // <-- NUEVO ESTADO
+
+  constructor() {
+    effect(
+      () => {
+        const c = this.cargo();
+        this.esPagoParcial.set(false); // Apagamos el switch por defecto al abrir
+
+        if (c && !c.es_multiple) {
+          this.montoAbonado.set(c.deuda_efectivo || c.monto_efectivo);
+        } else {
+          this.montoAbonado.set(null);
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
+
+  confirmar(metodo: string) {
+    // Solo mandamos el monto personalizado si es un cobro individual Y prendió el switch parcial
+    const montoFinal =
+      !this.cargo()?.es_multiple && this.esPagoParcial()
+        ? this.montoAbonado() || undefined
+        : undefined;
+
+    this.onConfirmar.emit({
+      metodo: metodo,
+      monto: montoFinal,
+    });
   }
 
   cerrar() {

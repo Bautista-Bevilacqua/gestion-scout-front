@@ -15,8 +15,12 @@ export class CargoService {
     return this.http.get<Cargo[]>(`${this.apiUrl}/beneficiario/${idBeneficiario}`);
   }
 
-  pagarCargo(idCargo: number, metodoPago: string = 'EFECTIVO'): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${idCargo}/pagar`, { metodoPago });
+  registrarPago(
+    idCargo: number,
+    metodoPago: string = 'EFECTIVO',
+    montoAbonado?: number,
+  ): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${idCargo}/pagar`, { metodoPago, montoAbonado });
   }
 
   asignarIndividual(idBeneficiario: number, idConcepto: number): Observable<any> {

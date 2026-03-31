@@ -13,7 +13,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 @Component({
   selector: 'app-calendario-page',
   standalone: true,
-  imports: [CommonModule, FullCalendarModule, ReactiveFormsModule, ConfirmModalComponent],
+  imports: [CommonModule, FullCalendarModule, ReactiveFormsModule, ],
   templateUrl: './calendario-page.component.html',
   styleUrl: './calendario-page.component.css',
 })

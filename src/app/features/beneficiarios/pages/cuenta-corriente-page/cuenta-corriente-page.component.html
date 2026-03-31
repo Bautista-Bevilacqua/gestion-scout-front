@@ -93,7 +93,7 @@
               </thead>
               <tbody>
                 @for (c of cargos(); track c.id_cargo) {
-                  @if (c.estado === 'PENDIENTE') {
+                  @if (c.estado === 'PENDIENTE' || c.estado === 'PARCIAL') {
                     <tr class="hover group">
                       <td class="text-center">
                         <input
@@ -105,21 +105,43 @@
                       </td>
                       <td>
                         <div class="flex flex-col">
-                          <span class="font-bold">{{ c.concepto_nombre }}</span>
+                          <span class="font-bold flex items-center gap-2">
+                            {{ c.concepto_nombre }}
+                            @if (c.estado === 'PARCIAL') {
+                              <div class="badge badge-warning badge-sm">Parcial</div>
+                            }
+                          </span>
                           <button
                             class="text-xs text-primary font-bold text-left opacity-0 group-hover:opacity-100 transition-opacity"
                             (click)="prepararCobro(c)"
                           >
-                            Solo este pago
+                            Cobrar (Total o Parcial)
                           </button>
                         </div>
                       </td>
                       <td>{{ c.fecha_vencimiento | date: 'dd/MM/yyyy' }}</td>
 
                       <td class="whitespace-nowrap">
-                        <div class="text-success font-bold text-lg">${{ c.monto_efectivo }}</div>
-                        <div class="text-info font-bold text-sm opacity-80">
-                          ${{ c.monto_transferencia }}
+                        <div class="flex items-baseline gap-2">
+                          <span class="text-success font-black text-lg">
+                            ${{ c.deuda_efectivo_restante }}
+                          </span>
+                          @if ((c.total_pagado || 0) > 0) {
+                            <span class="text-xs opacity-60 line-through"
+                              >${{ c.monto_efectivo }}</span
+                            >
+                          }
+                        </div>
+
+                        <div class="flex items-baseline gap-2 text-info opacity-80 mt-1">
+                          <span class="font-bold text-sm">
+                            MP: ${{ c.deuda_transferencia_restante }}
+                          </span>
+                          @if ((c.total_pagado || 0) > 0) {
+                            <span class="text-[10px] line-through"
+                              >${{ c.monto_transferencia }}</span
+                            >
+                          }
                         </div>
                       </td>
                     </tr>
@@ -176,24 +198,37 @@
                 </tr>
               </thead>
               <tbody>
-                @for (c of cargos(); track c.id_cargo) {
-                  @if (c.estado === 'PAGADO') {
-                    <tr class="hover opacity-80">
-                      <td>{{ c.fecha_pago | date: 'dd/MM/yyyy' }}</td>
-                      <td class="font-medium">{{ c.concepto_nombre }}</td>
+                @for (pago of historialPagosGlobal(); track pago.id_pago) {
+                  <tr class="hover opacity-80">
+                    <td>{{ pago.fecha_pago | date: 'dd/MM/yyyy' }}</td>
 
-                      <td class="text-center">
-                        <div class="badge badge-outline badge-sm font-semibold">
-                          {{ c.metodo_pago || 'EFECTIVO' }}
-                        </div>
-                      </td>
+                    <td class="font-medium">
+                      {{ pago.concepto_nombre }}
+                      @if (pago.cargo_estado === 'PARCIAL' || pago.historial_length > 1) {
+                        <span class="text-[10px] bg-warning/20 text-warning px-1 rounded ml-1"
+                          >Parte</span
+                        >
+                      }
+                    </td>
 
-                      <td class="font-bold text-success">${{ c.monto_pagado }}</td>
-                      <td class="text-xs italic">
-                        {{ c.cobrador_nombre }} {{ c.cobrador_apellido }}
-                      </td>
-                    </tr>
-                  }
+                    <td class="text-center">
+                      <div class="badge badge-outline badge-sm font-semibold">
+                        {{ pago.metodo_pago || 'EFECTIVO' }}
+                      </div>
+                    </td>
+
+                    <td class="font-bold text-success">${{ pago.monto_pagado }}</td>
+
+                    <td class="text-xs italic">
+                      {{ pago.cobrador_nombre }} {{ pago.cobrador_apellido }}
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="5" class="text-center py-12 opacity-50 text-xl italic font-medium">
+                      No hay registros de pagos en el historial.
+                    </td>
+                  </tr>
                 }
               </tbody>
             </table>
