@@ -44,7 +44,7 @@
 
         <th class="text-center">Historial</th>
 
-        @if (isAdmin()) {
+        @if (isGerencia()) {
           <th class="text-center">Acciones</th>
         }
       </tr>
@@ -94,7 +94,7 @@
             </a>
           </td>
 
-          @if (isAdmin()) {
+          @if (isGerencia()) {
             <td class="text-center px-1 md:px-4">
               <div class="flex justify-center gap-1">
                 <button

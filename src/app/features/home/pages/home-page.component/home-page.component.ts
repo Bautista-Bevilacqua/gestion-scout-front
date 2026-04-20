@@ -18,20 +18,21 @@ export class HomePageComponent implements OnInit {
   private familiaService = inject(FamiliaService);
   private cajaService = inject(CajaService);
 
-  // Señales de estado general
   public cargando = signal(true);
   public totalBeneficiarios = signal(0);
   public totalFamilias = signal(0);
   public balanceCaja = signal(0);
-
-  // NUEVO: Señal para los beneficiarios de la rama del dirigente
   public beneficiariosDeMiRama = signal(0);
 
-  // Datos del usuario logueado
   public usuarioActual = this.authService.usuarioActual;
 
-  // Helpers para los roles
-  public isAdmin = computed(() => this.usuarioActual()?.rol === 'ADMIN');
+  // --- LÓGICA DE ROLES ACTUALIZADA ---
+  // Definimos quiénes ven el dashboard "completo"
+  public esGestion = computed(() => {
+    const rol = this.usuarioActual()?.rol;
+    return ['ADMIN', 'JEFE_GRUPO', 'ADMINISTRACION'].includes(rol || '');
+  });
+
   public rolUsuario = computed(() => this.usuarioActual()?.rol || 'Invitado');
   public nombreUsuario = computed(() => this.usuarioActual()?.nombre || 'Dirigente');
 
@@ -42,22 +43,21 @@ export class HomePageComponent implements OnInit {
   cargarDatosDashboard() {
     this.cargando.set(true);
 
+    // 1. Todos cargan beneficiarios (pero el servicio ya los filtra por rol en el backend)
     this.beneficiarioService.getBeneficiarios().subscribe((b) => {
       this.totalBeneficiarios.set(b.length);
 
-      // Si NO es admin, calculamos cuántos chicos hay en su rama específica
-      if (!this.isAdmin()) {
+      // Si es un dirigente de rama, calculamos el total de su rama específica
+      if (!this.esGestion()) {
         const rol = this.rolUsuario();
-        // Capitalizamos el rol (ej: MANADA -> Manada) para que coincida con la BD
         const ramaCapitalizada = rol.charAt(0).toUpperCase() + rol.slice(1).toLowerCase();
-
         const chicosDeRama = b.filter((chico) => chico.rama_actual === ramaCapitalizada);
         this.beneficiariosDeMiRama.set(chicosDeRama.length);
       }
     });
 
-    if (this.isAdmin()) {
-      // Los admin cargan familias y caja
+    // 2. Solo los roles de gestión cargan estadísticas de Familias y Caja
+    if (this.esGestion()) {
       this.familiaService.getFamilias().subscribe((f) => {
         this.totalFamilias.set(f.length);
       });
@@ -71,15 +71,16 @@ export class HomePageComponent implements OnInit {
         this.cargando.set(false);
       });
     } else {
-      // Si no es admin, termina más rápido
       this.cargando.set(false);
     }
   }
 
-  // Helper para generar el link a la rama correcta
   getLinkMiRama(): string {
     const rol = this.rolUsuario();
-    if (rol === 'ADMIN') return '/beneficiarios';
+    // Si es gestión, el link principal es la nómina general
+    if (this.esGestion()) return '/beneficiarios';
+
+    // Si es rama, va a su rama específica
     const ramaCapitalizada = rol.charAt(0).toUpperCase() + rol.slice(1).toLowerCase();
     return `/beneficiarios/rama/${ramaCapitalizada}`;
   }

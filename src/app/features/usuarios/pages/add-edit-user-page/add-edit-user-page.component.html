@@ -96,11 +96,19 @@
                   [class.select-error]="campoEsInvalido('rol')"
                 >
                   <option value="" disabled selected>Seleccione un rol...</option>
-                  <option value="MANADA">🐺 Manada</option>
-                  <option value="UNIDAD">⚜️ Unidad</option>
-                  <option value="CAMINANTES">🧭 Caminantes</option>
-                  <option value="ROVERS">🔥 Rovers</option>
-                  <option value="ADMIN">⚙️ Administrador</option>
+
+                  <optgroup label="Ramas">
+                    <option value="MANADA">🐺 Manada</option>
+                    <option value="UNIDAD">⚜️ Unidad</option>
+                    <option value="CAMINANTES">🧭 Caminantes</option>
+                    <option value="ROVERS">🔥 Rovers</option>
+                  </optgroup>
+
+                  <optgroup label="Gestión">
+                    <option value="JEFE_GRUPO">⛺ Jefe de Grupo</option>
+                    <option value="ADMINISTRACION">📊 Administración / Tesorería</option>
+                    <option value="ADMIN">⚙️ Administrador del Sistema</option>
+                  </optgroup>
                 </select>
                 @if (campoEsInvalido('rol')) {
                   <div class="label py-0 mt-1">

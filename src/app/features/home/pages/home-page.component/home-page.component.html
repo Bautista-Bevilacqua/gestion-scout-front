@@ -5,7 +5,7 @@
     </h1>
     <p class="text-lg opacity-70">
       Bienvenido al panel de control del Grupo 108.
-      @if (!isAdmin()) {
+      @if (!esGestion()) {
         Rama: <strong>{{ rolUsuario() }}</strong>
       }
     </p>
@@ -16,7 +16,7 @@
       <span class="loading loading-spinner loading-lg text-primary"></span>
     </div>
   } @else {
-    @if (isAdmin()) {
+    @if (esGestion()) {
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 w-full">
         <div class="stat bg-base-100 shadow-md rounded-box border border-base-200">
           <div class="stat-figure text-primary text-4xl">⚜️</div>
@@ -99,6 +99,7 @@
           </div>
         </a>
       </div>
+
     } @else {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 w-full max-w-3xl">
         <div class="stat bg-base-100 shadow-md rounded-box border border-base-200">

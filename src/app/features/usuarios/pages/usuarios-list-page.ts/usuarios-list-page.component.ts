@@ -32,7 +32,10 @@ export class UsuarioListPageComponent implements OnInit {
   public error = signal<string | null>(null);
   public usuarioSeleccionado = signal<Usuario | null>(null);
 
-  public isAdmin = computed(() => this.authService.usuarioActual()?.rol === 'ADMIN');
+  public isAdmin = computed(() => {
+    const rolActual = this.authService.usuarioActual()?.rol;
+    return rolActual === 'ADMIN' || rolActual === 'JEFE_GRUPO';
+  });
 
   public usuariosFiltrados = computed(() => {
     const lista = this.usuarios();

@@ -18,7 +18,17 @@ export class TablaFamiliasComponent {
   @Output() onEliminar = new EventEmitter<Familia>();
 
   // 2. Permisos y Ordenamiento
-  public isAdmin = computed(() => this.authService.usuarioActual()?.rol === 'ADMIN');
+  public isAdmin = computed(() => {
+    const rol = this.authService.usuarioActual()?.rol;
+    return rol === 'ADMIN' || rol === 'JEFE_GRUPO';
+  });
+
+  public isGerencia = computed(() => {
+    const rol = this.authService.usuarioActual()?.rol;
+    return rol === 'ADMIN' || rol === 'JEFE_GRUPO' || rol === 'ADMINISTRACION';
+  });
+
+  
   public sortField = signal<keyof Familia>('apellido_familia');
   public sortDirection = signal<'asc' | 'desc'>('asc');
 

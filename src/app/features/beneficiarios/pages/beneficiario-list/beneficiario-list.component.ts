@@ -25,7 +25,10 @@ export class BeneficiarioListComponent implements OnInit {
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
 
-  public isAdmin = computed(() => this.authService.usuarioActual()?.rol === 'ADMIN');
+  public isAdmin = computed(() => {
+    const rol = this.authService.usuarioActual()?.rol;
+    return rol === 'ADMIN' || rol === 'JEFE_GRUPO';
+  });
 
   public searchTerm = signal<string>('');
 
@@ -36,12 +39,14 @@ export class BeneficiarioListComponent implements OnInit {
   public ramaSeleccionada = signal<string | null>(null);
 
   public beneficiariosFiltrados = computed(() => {
-    const listaCompleta = this.beneficiarios();
-    const rama = this.ramaSeleccionada();
+    const listaCompleta = this.beneficiarios(); 
+    const ramaURL = this.ramaSeleccionada(); 
     const busqueda = this.searchTerm().toLowerCase().trim();
 
     return listaCompleta.filter((b) => {
-      const cumpleRama = !rama || b.rama_actual?.toLowerCase() === rama.toLowerCase();
+     
+      const cumpleRama = !ramaURL || b.rama_actual?.toLowerCase() === ramaURL.toLowerCase();
+
       const cumpleBusqueda =
         !busqueda ||
         b.nombre.toLowerCase().includes(busqueda) ||
@@ -61,13 +66,13 @@ export class BeneficiarioListComponent implements OnInit {
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
       this.ramaSeleccionada.set(params.get('rama'));
-      this.cargarBeneficiarios(); 
+      this.cargarBeneficiarios();
     });
   }
 
   cargarBeneficiarios(forzarRecarga: boolean = false) {
     this.cargando.set(true);
-    this.error.set(null); 
+    this.error.set(null);
 
     this.beneficiarioService.getBeneficiarios(forzarRecarga).subscribe({
       next: (data) => {

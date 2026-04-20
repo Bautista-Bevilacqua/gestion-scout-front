@@ -4,8 +4,7 @@ import { Router } from '@angular/router';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export type RolUsuario = 'ADMIN' | 'MANADA' | 'UNIDAD' | 'CAMINANTES' | 'ROVERS';
-
+export type RolUsuario = 'ADMIN' | 'MANADA' | 'UNIDAD' | 'CAMINANTES' | 'ROVERS' | 'JEFE_GRUPO' | 'ADMINISTRACION';
 export interface UsuarioLogueado {
   id: number;
   nombre: string;

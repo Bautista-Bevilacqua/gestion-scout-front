@@ -23,7 +23,7 @@
             }}</span>
           </div>
         </th>
-        @if (isAdmin()) {
+        @if (isGerencia()) {
           <th class="text-center">Acciones</th>
         }
       </tr>
@@ -46,7 +46,7 @@
             <span class="opacity-70 italic text-sm">{{ f.email || 'Sin correo' }}</span>
           </td>
 
-          @if (isAdmin()) {
+          @if (isGerencia()) {
             <td class="text-center">
               <div class="flex justify-center gap-2">
                 <button

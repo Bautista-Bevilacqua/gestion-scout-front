@@ -5,7 +5,7 @@ export const beneficiariosRoutes: Routes = [
   {
     path: '', // La lista general de TODOS los scouts
     canActivate: [roleGuard],
-    data: { roles: ['ADMIN'] }, // <-- SOLO ADMIN
+    data: { roles: ['ADMIN', 'JEFE_GRUPO', 'ADMINISTRACION'] }, // <-- SOLO ADMIN
     loadComponent: () =>
       import('./pages/beneficiario-list/beneficiario-list.component').then(
         (m) => m.BeneficiarioListComponent,
@@ -23,7 +23,7 @@ export const beneficiariosRoutes: Routes = [
   {
     path: 'nuevo',
     canActivate: [roleGuard],
-    data: { roles: ['ADMIN'] }, // Crear beneficiarios suele ser tarea del Admin
+    data: { roles: ['ADMIN', 'JEFE_GRUPO', 'ADMINISTRACION'] }, // Crear beneficiarios suele ser tarea del Admin
     loadComponent: () =>
       import('./pages/beneficiario-page/beneficiario-page.component').then(
         (m) => m.BeneficiarioFormComponent,
@@ -32,7 +32,7 @@ export const beneficiariosRoutes: Routes = [
   {
     path: 'editar/:id',
     canActivate: [roleGuard],
-    data: { roles: ['ADMIN'] }, // Editar beneficiarios suele ser tarea del Admin
+    data: { roles: ['ADMIN', 'JEFE_GRUPO', 'ADMINISTRACION'] }, // Editar beneficiarios suele ser tarea del Admin
     loadComponent: () =>
       import('./pages/beneficiario-page/beneficiario-page.component').then(
         (m) => m.BeneficiarioFormComponent,

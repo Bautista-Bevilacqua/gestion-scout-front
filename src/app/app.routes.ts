@@ -40,21 +40,21 @@ export const routes: Routes = [
       {
         path: 'familias',
         canActivate: [roleGuard], // <-- PATOVICA DE ROL
-        data: { roles: ['ADMIN'] }, // <-- SOLO ADMIN
+        data: { roles: ['ADMIN', 'JEFE_GRUPO', 'ADMINISTRACION'] }, // <-- SOLO ADMIN
         loadChildren: () =>
           import('./features/familias/familias.routes').then((m) => m.familiasRoutes),
       },
       {
         path: 'usuarios',
         canActivate: [roleGuard], // <-- PATOVICA DE ROL
-        data: { roles: ['ADMIN'] }, // <-- SOLO ADMIN
+        data: { roles: ['ADMIN', 'JEFE_GRUPO', 'ADMINISTRACION'] }, // <-- SOLO ADMIN
         loadChildren: () =>
           import('./features/usuarios/usuarios.routes').then((m) => m.usuariosRoutes),
       },
       {
         path: 'tesoreria',
         canActivate: [roleGuard],
-        data: { roles: ['ADMIN'] },
+        data: { roles: ['ADMIN', 'JEFE_GRUPO', 'ADMINISTRACION'] },
         loadChildren: () =>
           import('./features/tesoreria/tesoreria.routes').then((m) => m.tesoreriaRoutes),
       },

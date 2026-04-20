@@ -49,7 +49,15 @@ export class BeneficiariosTableComponent {
     });
   });
 
-  public isAdmin = computed(() => this.authService.usuarioActual()?.rol === 'ADMIN');
+  public isAdmin = computed(() => {
+    const rol = this.authService.usuarioActual()?.rol;
+    return rol === 'ADMIN' || rol === 'JEFE_GRUPO';
+  });
+
+  public isGerencia = computed(() => {
+    const rol = this.authService.usuarioActual()?.rol;
+    return rol === 'ADMIN' || rol === 'JEFE_GRUPO' || rol === 'ADMINISTRACION';
+  });
 
   cambiarOrden(field: keyof Beneficiario) {
     if (this.sortField() === field) {

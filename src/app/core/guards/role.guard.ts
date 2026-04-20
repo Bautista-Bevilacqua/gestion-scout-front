@@ -5,41 +5,49 @@ import { AuthService } from '../services/auth.service';
 export const roleGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-
   const usuario = authService.usuarioActual();
 
-  // Si no hay usuario, ni nos gastamos, el authGuard ya lo va a rebotar, pero por las dudas:
   if (!usuario) {
     router.navigate(['/login']);
     return false;
   }
 
-  // EL ADMIN ES DIOS: Pasa a cualquier lado sin que le pregunten nada
-  if (usuario.rol === 'ADMIN') {
+  // 1. LOS "DIOSES" (Pase libre total)
+  // Dejamos solo a Admin y Jefe de Grupo. Ellos entran a TODO sin preguntar.
+  if (['ADMIN', 'JEFE_GRUPO'].includes(usuario.rol)) {
     return true;
   }
 
-  // CASO 1: La ruta tiene una lista de roles permitidos quemada en la configuración
+  // 2. CONTROL POR RUTA (CASO 1)
+  // Acá es donde el Tesorero va a rebotar en "Conceptos" porque su rol no está en la lista.
   const rolesPermitidos = route.data['roles'] as Array<string>;
   if (rolesPermitidos && rolesPermitidos.includes(usuario.rol)) {
     return true;
   }
 
-  // CASO 2: Rutas dinámicas de Ramas (ej: /beneficiarios/rama/Manada)
+  // 3. CONTROL DE RAMAS (CASO 2)
   const ramaParam = route.paramMap.get('rama');
   if (ramaParam) {
-    // Si el usuario es de MANADA y quiere entrar a /rama/Manada, lo dejamos
+    // Si es ADMINISTRACION, lo dejamos ver cualquier rama (Pase libre de consulta)
+    if (usuario.rol === 'ADMINISTRACION') {
+      return true;
+    }
+
+    // Dirigentes comunes: solo su rama
     if (usuario.rol.toUpperCase() === ramaParam.toUpperCase()) {
       return true;
     }
   }
 
-  // SI LLEGA ACÁ: Es porque quiso entrar a una URL que no le corresponde (ej: un Unidad queriendo ver Dirigentes)
-  // Lo mandamos obligado a la pantalla de su propia rama para que no ande husmeando
+  // 4. SI LLEGA ACÁ: Intruso o sin permiso
+  // Si es Administración y rebotó (ej: quiso entrar a Conceptos), lo mandamos a Caja
+  if (usuario.rol === 'ADMINISTRACION') {
+    router.navigate(['/tesoreria/caja']);
+    return false;
+  }
 
-  // Convertimos 'UNIDAD' a 'Unidad' para que la URL quede linda
+  // Si es rama, lo mandamos a su nómina
   const nombreRama = usuario.rol.charAt(0) + usuario.rol.slice(1).toLowerCase();
   router.navigate([`/beneficiarios/rama/${nombreRama}`]);
-
   return false;
 };
