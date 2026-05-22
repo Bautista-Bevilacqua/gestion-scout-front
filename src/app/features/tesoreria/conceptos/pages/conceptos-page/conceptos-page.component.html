@@ -15,6 +15,14 @@
         🧹 Limpiar Pagados
       </button>
 
+      <button
+        class="btn btn-outline"
+        (click)="toggleArchivados()"
+        [class.btn-active]="mostrarArchivados()"
+      >
+        🗑️ {{ mostrarArchivados() ? 'Ocultar Papelera' : 'Ver Papelera' }}
+      </button>
+
       <button class="btn btn-outline btn-primary" (click)="modalCuotas.abrir()">
         📅 Generar Cuotas
       </button>
@@ -53,7 +61,6 @@
             >
               <td class="font-bold">
                 {{ c.nombre }}
-
                 @if (c.vencido) {
                   <span class="badge badge-error badge-sm ml-2 animate-pulse font-bold"
                     >VENCIDO</span
@@ -92,27 +99,26 @@
 
               <td class="text-center">
                 <div class="flex justify-center gap-2">
-                  @if (c.vencido) {
-                    <button
-                      class="btn btn-sm btn-error shadow-sm"
-                      (click)="prepararActualizacion(c)"
-                      title="Actualizar precio retroactivo"
-                    >
-                      ⚠️ Actualizar Precio
-                    </button>
-                  } @else {
-                    <button
-                      class="btn btn-sm btn-outline btn-success"
-                      (click)="prepararAsignacion(c)"
-                      title="Generar deudas a beneficiarios"
-                    >
-                      💵 Asignar
-                    </button>
-                  }
+                  <button
+                    class="btn btn-sm btn-warning btn-outline shadow-sm"
+                    (click)="prepararActualizacion(c)"
+                    title="Editar nombre, alcance o precios"
+                  >
+                    ✏️ Editar
+                  </button>
+
+                  <button
+                    class="btn btn-sm btn-outline btn-success"
+                    (click)="prepararAsignacion(c)"
+                    title="Generar deudas a beneficiarios"
+                  >
+                    💵 Asignar
+                  </button>
 
                   <button
                     class="btn btn-sm btn-ghost text-error opacity-70 hover:opacity-100"
-                    (click)="prepararBorrado(c)"
+                    (click)="prepararArchivado(c)"
+                    title="Enviar a la papelera"
                   >
                     🗑️
                   </button>
@@ -128,6 +134,60 @@
           }
         </tbody>
       </table>
+    </div>
+  }
+
+  @if (mostrarArchivados()) {
+    <div class="mt-8 card bg-base-200 border border-base-300 shadow-inner overflow-x-auto">
+      <div class="card-body p-4">
+        <h3 class="text-xl font-bold text-base-content/70 mb-4">🗑️ Conceptos Archivados</h3>
+
+        <table class="table table-sm table-zebra w-full opacity-80">
+          <thead>
+            <tr>
+              <th>Concepto</th>
+              <th>Vencimiento</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ca of conceptosArchivados(); track ca.id_concepto) {
+              <tr>
+                <td class="font-bold">{{ ca.nombre }}</td>
+                <td>
+                  {{
+                    ca.fecha_vencimiento ? (ca.fecha_vencimiento | date: 'dd/MM/yyyy') : 'Sin vto.'
+                  }}
+                </td>
+                <td class="text-center">
+                  <div class="flex justify-center gap-2">
+                    <button
+                      class="btn btn-xs btn-success btn-outline"
+                      (click)="restaurarConcepto(ca)"
+                      title="Recuperar a la lista principal"
+                    >
+                      ♻️ Recuperar
+                    </button>
+                    <button
+                      class="btn btn-xs btn-error"
+                      (click)="prepararBorradoPermanente(ca)"
+                      title="Eliminar para siempre"
+                    >
+                      ❌ Permanente
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3" class="text-center py-4 text-base-content/50">
+                  La papelera está vacía.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   }
 </div>
@@ -203,7 +263,7 @@
 
 <dialog id="modal_actualizar_precio" class="modal">
   <div class="modal-box border-t-4 border-warning">
-    <h3 class="font-bold text-2xl mb-2 text-warning">Actualizar Valor</h3>
+    <h3 class="font-bold text-2xl mb-2 text-warning">Actualizar Concepto</h3>
     <p class="font-bold text-lg mb-4">{{ conceptoSeleccionado()?.nombre }}</p>
 
     <div class="bg-warning/10 p-4 rounded-xl mb-6">
@@ -218,9 +278,33 @@
       (ngSubmit)="confirmarActualizacion()"
       class="flex flex-col gap-4"
     >
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label class="form-control w-full">
+          <div class="label"><span class="label-text font-bold">Nombre del Concepto</span></div>
+          <input
+            type="text"
+            formControlName="nombre"
+            class="input input-bordered w-full focus:input-warning"
+          />
+        </label>
+        <label class="form-control w-full">
+          <div class="label"><span class="label-text font-bold">Alcance</span></div>
+          <select
+            formControlName="alcance"
+            class="select select-bordered w-full focus:select-warning"
+          >
+            <option value="GRUPO">Todo el Grupo</option>
+            <option value="MANADA">Manada</option>
+            <option value="UNIDAD">Unidad</option>
+            <option value="CAMINANTES">Caminantes</option>
+            <option value="ROVERS">Rovers</option>
+          </select>
+        </label>
+      </div>
+
       <div class="grid grid-cols-2 gap-4">
         <label class="form-control w-full">
-          <div class="label"><span class="label-text font-bold">Nuevo Efvo ($)</span></div>
+          <div class="label"><span class="label-text font-bold">Efvo ($)</span></div>
           <input
             type="number"
             formControlName="monto_efectivo"
@@ -228,7 +312,7 @@
           />
         </label>
         <label class="form-control w-full">
-          <div class="label"><span class="label-text font-bold">Nuevo MP/Transf ($)</span></div>
+          <div class="label"><span class="label-text font-bold">MP/Transf ($)</span></div>
           <input
             type="number"
             formControlName="monto_transferencia"
@@ -239,7 +323,7 @@
 
       <label class="form-control w-full">
         <div class="label">
-          <span class="label-text font-bold">Patear Vencimiento hasta:</span>
+          <span class="label-text font-bold">Fecha de Vencimiento:</span>
         </div>
         <input
           type="date"
@@ -249,15 +333,13 @@
       </label>
 
       <div class="modal-action mt-6">
-        <button type="button" class="btn" onclick="modal_actualizar_precio.close()">
-          Cancelar
-        </button>
+        <form method="dialog"><button class="btn">Cancelar</button></form>
         <button
           type="submit"
           class="btn btn-warning shadow-md"
           [disabled]="actualizarForm.invalid || guardando()"
         >
-          {{ guardando() ? 'Aplicando cambios...' : 'Confirmar Aumento' }}
+          {{ guardando() ? 'Guardando...' : 'Guardar Cambios' }}
         </button>
       </div>
     </form>
@@ -266,15 +348,28 @@
 </dialog>
 
 <app-confirm-modal
-  modalId="modal_borrar_concepto"
-  titulo="¿Confirmar eliminación?"
+  modalId="modal_archivar_concepto"
+  titulo="¿Enviar a la Papelera?"
   [mensaje]="
-    'Estás por borrar el concepto de cobro <strong>' +
+    'Vas a enviar <strong>' +
     (conceptoSeleccionado()?.nombre || '') +
-    '</strong>.<br><br>Solo podrás eliminarlo si aún no se le ha generado esta deuda a ningún beneficiario.'
+    '</strong> a la papelera.<br><br>Desaparecerá de esta lista pero podrás recuperarlo más tarde si lo necesitás.'
   "
-  textoBoton="Eliminar"
-  (confirmar)="confirmarBorrado()"
+  textoBoton="Mandar a Papelera"
+  (confirmar)="confirmarArchivado()"
+>
+</app-confirm-modal>
+
+<app-confirm-modal
+  modalId="modal_borrar_permanente"
+  titulo="¿Eliminar para siempre?"
+  [mensaje]="
+    'Estás por eliminar definitivamente <strong>' +
+    (conceptoSeleccionado()?.nombre || '') +
+    '</strong>.<br><br>⚠️ Esta acción NO se puede deshacer y solo funcionará si todavía no se le generó esta deuda a nadie.'
+  "
+  textoBoton="Eliminar Permanente"
+  (confirmar)="confirmarBorradoPermanente()"
 >
 </app-confirm-modal>
 

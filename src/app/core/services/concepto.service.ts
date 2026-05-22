@@ -54,7 +54,7 @@ export class ConceptoService {
   actualizarPrecio(id: number, data: any): Observable<any> {
     return this.http
       .put<any>(`${this.apiUrl}/actualizar-precio/${id}`, data)
-      .pipe(tap(() => this.limpiarCache())); 
+      .pipe(tap(() => this.limpiarCache()));
   }
 
   archivarPagados(): Observable<{ mensaje: string; cantidad: number }> {
@@ -65,5 +65,13 @@ export class ConceptoService {
 
   archivarConcepto(id: number): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/archivar`, {}).pipe(tap(() => this.limpiarCache()));
+  }
+
+  getConceptosArchivados() {
+    return this.http.get<ConceptoCobro[]>(`${this.apiUrl}/archivados`);
+  }
+
+  restaurarConcepto(id: number) {
+    return this.http.put(`${this.apiUrl}/${id}/restaurar`, {});
   }
 }

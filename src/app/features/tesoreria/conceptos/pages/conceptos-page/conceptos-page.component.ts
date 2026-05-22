@@ -34,6 +34,9 @@ export class ConceptosPageComponent implements OnInit {
   public exitoMsg = signal<string | null>(null);
   public conceptoSeleccionado = signal<ConceptoCobro | null>(null);
 
+  public mostrarArchivados = signal(false);
+  public conceptosArchivados = signal<ConceptoCobro[]>([]);
+
   public conceptosConAlerta = computed(() => {
     const hoyStr = new Date().toISOString().split('T')[0];
 
@@ -58,9 +61,11 @@ export class ConceptosPageComponent implements OnInit {
   });
 
   public actualizarForm = this.fb.group({
+    nombre: ['', Validators.required],
     monto_efectivo: ['', [Validators.required, Validators.min(0)]],
     monto_transferencia: ['', [Validators.required, Validators.min(0)]],
-    fecha_vencimiento: ['', Validators.required],
+    alcance: ['GRUPO', Validators.required],
+    fecha_vencimiento: [''],
   });
 
   ngOnInit() {
@@ -120,12 +125,13 @@ export class ConceptosPageComponent implements OnInit {
 
   prepararActualizacion(concepto: any) {
     this.conceptoSeleccionado.set(concepto);
-
     const fechaLimpia = concepto.fecha_vencimiento ? concepto.fecha_vencimiento.split('T')[0] : '';
 
     this.actualizarForm.patchValue({
+      nombre: concepto.nombre,
       monto_efectivo: concepto.monto_efectivo.toString(),
       monto_transferencia: concepto.monto_transferencia.toString(),
+      alcance: concepto.alcance,
       fecha_vencimiento: fechaLimpia,
     });
 
@@ -142,8 +148,10 @@ export class ConceptosPageComponent implements OnInit {
     const formValue = this.actualizarForm.value;
 
     const datosNuevos = {
+      nombre: formValue.nombre,
       monto_efectivo: Number(formValue.monto_efectivo),
       monto_transferencia: Number(formValue.monto_transferencia),
+      alcance: formValue.alcance,
       fecha_vencimiento: formValue.fecha_vencimiento,
     };
 
@@ -151,9 +159,7 @@ export class ConceptosPageComponent implements OnInit {
       next: () => {
         this.guardando.set(false);
         (document.getElementById('modal_actualizar_precio') as HTMLDialogElement)?.close();
-        this.exitoMsg.set(
-          `¡Se actualizó el valor y se ajustaron las deudas pendientes de ${concepto.nombre}!`,
-        );
+        this.exitoMsg.set(`¡Se actualizaron los datos y deudas de ${formValue.nombre}!`);
         this.cargarConceptos(true);
       },
       error: () => {
@@ -163,13 +169,14 @@ export class ConceptosPageComponent implements OnInit {
     });
   }
 
-  prepararBorrado(concepto: ConceptoCobro) {
+  // --- FLUJO 1: MANDAR A PAPELERA (SOFT DELETE) ---
+  prepararArchivado(concepto: ConceptoCobro) {
     this.conceptoSeleccionado.set(concepto);
-    const modal = document.getElementById('modal_borrar_concepto') as HTMLDialogElement;
+    const modal = document.getElementById('modal_archivar_concepto') as HTMLDialogElement;
     modal?.showModal();
   }
 
-  confirmarBorrado() {
+  confirmarArchivado() {
     const concepto = this.conceptoSeleccionado();
     if (!concepto) return;
     this.cargando.set(true);
@@ -177,16 +184,52 @@ export class ConceptosPageComponent implements OnInit {
     this.conceptoService.archivarConcepto(concepto.id_concepto).subscribe({
       next: () => {
         (document.getElementById('modal_archivar_concepto') as HTMLDialogElement)?.close();
-        this.exitoMsg.set(`El concepto "${concepto.nombre}" fue ocultado exitosamente.`);
+        this.exitoMsg.set(`El concepto "${concepto.nombre}" fue enviado a la papelera.`);
         this.cargarConceptos(true);
+        if (this.mostrarArchivados()) this.cargarArchivados();
       },
       error: (err) => {
         (document.getElementById('modal_archivar_concepto') as HTMLDialogElement)?.close();
-
         if (err.status === 400) {
-          this.errorMsg.set(err.error?.message || 'No se puede ocultar, alguien debe plata.');
+          this.errorMsg.set(
+            err.error?.message || 'No se puede ocultar, alguien todavía debe plata.',
+          );
         } else {
           this.errorMsg.set('Hubo un error al intentar ocultar el concepto.');
+        }
+        this.cargando.set(false);
+      },
+    });
+  }
+
+  // --- FLUJO 2: BORRAR PERMANENTE (HARD DELETE) ---
+  prepararBorradoPermanente(concepto: ConceptoCobro) {
+    this.conceptoSeleccionado.set(concepto);
+    const modal = document.getElementById('modal_borrar_permanente') as HTMLDialogElement;
+    modal?.showModal();
+  }
+
+  confirmarBorradoPermanente() {
+    const concepto = this.conceptoSeleccionado();
+    if (!concepto) return;
+    this.cargando.set(true);
+
+    this.conceptoService.eliminarConcepto(concepto.id_concepto).subscribe({
+      next: () => {
+        (document.getElementById('modal_borrar_permanente') as HTMLDialogElement)?.close();
+        this.exitoMsg.set(`"${concepto.nombre}" fue eliminado definitivamente del sistema.`);
+        this.cargarArchivados();
+        this.cargando.set(false);
+      },
+      error: (err) => {
+        (document.getElementById('modal_borrar_permanente') as HTMLDialogElement)?.close();
+        if (err.status === 400) {
+          this.errorMsg.set(
+            err.error?.message ||
+              'No podés borrar este concepto porque ya hay beneficiarios con esta deuda.',
+          );
+        } else {
+          this.errorMsg.set('Hubo un error al intentar eliminar el concepto de la base de datos.');
         }
         this.cargando.set(false);
       },
@@ -243,6 +286,35 @@ export class ConceptosPageComponent implements OnInit {
       },
       error: () => {
         this.errorMsg.set('Error al intentar archivar los conceptos.');
+        this.cargando.set(false);
+      },
+    });
+  }
+
+  toggleArchivados() {
+    this.mostrarArchivados.update((v) => !v);
+    if (this.mostrarArchivados()) {
+      this.cargarArchivados();
+    }
+  }
+
+  cargarArchivados() {
+    this.conceptoService.getConceptosArchivados().subscribe({
+      next: (data) => this.conceptosArchivados.set(data),
+      error: () => this.errorMsg.set('Error al cargar la papelera.'),
+    });
+  }
+
+  restaurarConcepto(concepto: ConceptoCobro) {
+    this.cargando.set(true);
+    this.conceptoService.restaurarConcepto(concepto.id_concepto).subscribe({
+      next: () => {
+        this.exitoMsg.set(`Se recuperó "${concepto.nombre}" exitosamente.`);
+        this.cargarConceptos(true);
+        this.cargarArchivados();
+      },
+      error: () => {
+        this.errorMsg.set('Error al recuperar el concepto.');
         this.cargando.set(false);
       },
     });

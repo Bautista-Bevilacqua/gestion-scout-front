@@ -16,6 +16,8 @@ export class GenerarCuotasModalComponent {
   onFinalizado = output<void>();
 
   public guardando = signal(false);
+  public errorMsg = signal<string | null>(null); // Nueva señal para el error
+
   public listaMeses = [
     'Enero',
     'Febrero',
@@ -41,11 +43,19 @@ export class GenerarCuotasModalComponent {
   });
 
   abrir() {
+    this.errorMsg.set(null); // Limpiamos errores previos al abrir
     this.cuotasForm.reset({ anio: new Date().getFullYear(), alcance: 'GRUPO', meses: [] });
+
+    // Desmarcamos visualmente los checkboxes si quedó alguno marcado
+    document
+      .querySelectorAll('#modal_generar_cuotas input[type="checkbox"]')
+      .forEach((cb: any) => (cb.checked = false));
+
     (document.getElementById('modal_generar_cuotas') as HTMLDialogElement)?.showModal();
   }
 
   cerrar() {
+    this.errorMsg.set(null); // Limpiamos errores al cerrar
     (document.getElementById('modal_generar_cuotas') as HTMLDialogElement)?.close();
   }
 
@@ -61,16 +71,24 @@ export class GenerarCuotasModalComponent {
   guardar() {
     if (this.cuotasForm.invalid) return;
 
+    this.errorMsg.set(null); // Limpiamos el error antes de intentar guardar
     this.guardando.set(true);
+
     this.conceptoService.crearCuotasMasivas(this.cuotasForm.value).subscribe({
       next: () => {
         this.guardando.set(false);
         this.onFinalizado.emit();
         this.cerrar();
       },
-      error: () => {
+      error: (err) => {
         this.guardando.set(false);
-        alert('Error al generar las cuotas');
+
+        // Atrapamos el mensaje del backend o mostramos uno genérico
+        if (err.error && err.error.message) {
+          this.errorMsg.set(err.error.message);
+        } else {
+          this.errorMsg.set('Hubo un error al generar las cuotas.');
+        }
       },
     });
   }
