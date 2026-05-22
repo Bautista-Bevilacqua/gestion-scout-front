@@ -3,9 +3,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "rootDir": "./src",
     "outDir": "./out-tsc/app",
     "types": []
   },
-  "include": ["src/**/*.ts", "src/app/features/tesoreria/conceptos/pages/conceptos-page", "src/app/features/tesoreria/caja/components/caja-table"],
+  "include": [
+    "src/**/*.ts",
+    "src/app/features/tesoreria/conceptos/pages/conceptos-page",
+    "src/app/features/tesoreria/caja/components/caja-table"
+  ],
   "exclude": ["src/**/*.spec.ts"]
 }

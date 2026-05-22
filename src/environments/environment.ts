@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api-grupo108.onrender.com/api',
+  apiUrl: 'https://api.gruposcout108.com.ar/api',
 };
