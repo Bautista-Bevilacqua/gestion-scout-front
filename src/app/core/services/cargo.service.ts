@@ -34,4 +34,11 @@ export class CargoService {
   eliminarCargo(idCargo: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${idCargo}`);
   }
+
+  cargarSaldoAFavor(idBeneficiario: number, monto: number, metodoPago: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/beneficiario/${idBeneficiario}/cargar-saldo`, {
+      monto,
+      metodoPago,
+    });
+  }
 }

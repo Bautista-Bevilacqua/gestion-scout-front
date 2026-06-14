@@ -52,7 +52,7 @@
 
       <p class="font-bold mb-4 text-center text-lg">¿Con qué método lo paga?</p>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-2 gap-4">
         <button
           class="btn btn-outline btn-success flex flex-col h-auto py-4 gap-2 hover:scale-[1.02] transition-transform"
           [disabled]="procesando() || (!cargo()?.es_multiple && esPagoParcial() && !montoAbonado())"
@@ -61,9 +61,9 @@
           <span class="text-4xl drop-shadow-sm">💵</span>
           <span class="text-sm uppercase font-black">Efectivo</span>
           @if (cargo()?.es_multiple || !esPagoParcial()) {
-            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full">
-              ${{ cargo()?.es_multiple ? cargo()?.monto_efectivo : cargo()?.deuda_efectivo }}
-            </span>
+            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full"
+              >${{ costoEfectivo() }}</span
+            >
           }
         </button>
 
@@ -75,11 +75,9 @@
           <span class="text-4xl drop-shadow-sm">📱</span>
           <span class="text-sm uppercase font-black">Mercado Pago</span>
           @if (cargo()?.es_multiple || !esPagoParcial()) {
-            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full">
-              ${{
-                cargo()?.es_multiple ? cargo()?.monto_transferencia : cargo()?.deuda_transferencia
-              }}
-            </span>
+            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full"
+              >${{ costoMP() }}</span
+            >
           }
         </button>
 
@@ -91,12 +89,34 @@
           <span class="text-4xl drop-shadow-sm">🏦</span>
           <span class="text-sm uppercase font-black">Transferencia</span>
           @if (cargo()?.es_multiple || !esPagoParcial()) {
-            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full">
-              ${{
-                cargo()?.es_multiple ? cargo()?.monto_transferencia : cargo()?.deuda_transferencia
-              }}
-            </span>
+            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full"
+              >${{ costoMP() }}</span
+            >
           }
+        </button>
+
+        <button
+          class="btn border-2 flex flex-col h-auto py-4 gap-2 transition-transform"
+          [ngClass]="
+            saldoAFavor() >= costoEfectivo()
+              ? 'btn-outline border-primary text-primary hover:bg-primary hover:text-white hover:scale-[1.02]'
+              : 'btn-disabled opacity-40 bg-base-200'
+          "
+          [disabled]="
+            procesando() ||
+            saldoAFavor() < costoEfectivo() ||
+            (!cargo()?.es_multiple && esPagoParcial() && !montoAbonado())
+          "
+          (click)="confirmar('SALDO_A_FAVOR')"
+        >
+          <span class="text-4xl drop-shadow-sm" [class.grayscale]="saldoAFavor() < costoEfectivo()"
+            >💳</span
+          >
+          <span class="text-sm uppercase font-black">Billetera Virtual</span>
+          <span
+            class="text-xs font-bold bg-base-100 text-base-content px-2 py-1 rounded-full mt-1 border"
+            >Disp: ${{ saldoAFavor() }}</span
+          >
         </button>
       </div>
     }
