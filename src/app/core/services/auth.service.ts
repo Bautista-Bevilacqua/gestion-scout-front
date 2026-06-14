@@ -4,7 +4,14 @@ import { Router } from '@angular/router';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export type RolUsuario = 'ADMIN' | 'MANADA' | 'UNIDAD' | 'CAMINANTES' | 'ROVERS' | 'JEFE_GRUPO' | 'ADMINISTRACION';
+export type RolUsuario =
+  | 'ADMIN'
+  | 'MANADA'
+  | 'UNIDAD'
+  | 'CAMINANTES'
+  | 'ROVERS'
+  | 'JEFE_GRUPO'
+  | 'ADMINISTRACION';
 export interface UsuarioLogueado {
   id: number;
   nombre: string;
@@ -33,7 +40,7 @@ export class AuthService {
       tap((res) => {
         const usuarioConToken: UsuarioLogueado = { ...res.usuario, token: res.token };
         this.usuarioActual.set(usuarioConToken);
-        localStorage.setItem('scout_session', JSON.stringify(usuarioConToken));
+        sessionStorage.setItem('scout_session', JSON.stringify(usuarioConToken));
       }),
       map(() => true),
       catchError(() => of(false)),
@@ -42,12 +49,12 @@ export class AuthService {
 
   logout() {
     this.usuarioActual.set(null);
-    localStorage.removeItem('scout_session');
+    sessionStorage.removeItem('scout_session');
     this.router.navigate(['/login']);
   }
 
   private cargarSesionGuardada() {
-    const sesion = localStorage.getItem('scout_session');
+    const sesion = sessionStorage.getItem('scout_session');
     if (sesion) {
       this.usuarioActual.set(JSON.parse(sesion));
     }
@@ -60,7 +67,7 @@ export class AuthService {
         if (user) {
           const userActualizado = { ...user, debe_cambiar_password: false };
           this.usuarioActual.set(userActualizado);
-          localStorage.setItem('scout_session', JSON.stringify(userActualizado));
+          sessionStorage.setItem('scout_session', JSON.stringify(userActualizado));
         }
       }),
       map(() => true),
