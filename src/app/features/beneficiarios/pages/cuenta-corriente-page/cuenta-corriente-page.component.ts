@@ -240,9 +240,10 @@ export class CuentaCorrientePageComponent implements OnInit {
     this.procesandoPago.set(true);
     const metodo = typeof eventoPagos === 'string' ? eventoPagos : eventoPagos.metodo;
     const montoParcial = typeof eventoPagos === 'string' ? undefined : eventoPagos.monto;
+    const usarSaldo = typeof eventoPagos === 'string' ? false : eventoPagos.usarSaldo || false;
 
     if (this.cargoAAsignar()?.es_multiple) {
-      this.cargoService.pagarMultiplesCargos(ids, metodo).subscribe({
+      this.cargoService.pagarMultiplesCargos(ids, metodo, usarSaldo).subscribe({
         next: () => {
           this.procesandoPago.set(false);
           this.cerrarModalCobro();
@@ -259,7 +260,7 @@ export class CuentaCorrientePageComponent implements OnInit {
           ? this.cargoAAsignar()?.deuda_efectivo
           : this.cargoAAsignar()?.deuda_transferencia;
       const montoAbonado = montoParcial || deudaTotalSegunMetodo;
-      this.cargoService.registrarPago(ids[0], metodo, montoAbonado).subscribe({
+      this.cargoService.registrarPago(ids[0], metodo, montoAbonado, usarSaldo).subscribe({
         next: () => {
           this.procesandoPago.set(false);
           this.cerrarModalCobro();

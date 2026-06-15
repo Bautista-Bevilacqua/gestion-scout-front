@@ -8,117 +8,122 @@
         <p class="text-xl font-black text-primary">{{ cargo()?.concepto_nombre }}</p>
       </div>
 
-      @if (!cargo()?.es_multiple) {
-        <div
-          class="form-control w-full max-w-sm mx-auto mb-8 bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm"
-        >
-          <label class="cursor-pointer label">
-            <span class="label-text font-bold text-lg">¿Es un pago parcial?</span>
-            <input
-              type="checkbox"
-              class="toggle toggle-primary"
-              [checked]="esPagoParcial()"
-              (change)="esPagoParcial.set(!esPagoParcial())"
-            />
-          </label>
+      <!-- Pago Parcial y Toggle Billetera -->
+      <div class="flex flex-col gap-4 max-w-sm mx-auto mb-8">
+        @if (!cargo()?.es_multiple) {
+          <div class="form-control bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm">
+            <label class="cursor-pointer label">
+              <span class="label-text font-bold text-lg">¿Es un pago parcial?</span>
+              <input
+                type="checkbox"
+                class="toggle toggle-primary"
+                [checked]="esPagoParcial()"
+                (change)="esPagoParcial.set(!esPagoParcial())"
+              />
+            </label>
 
-          @if (esPagoParcial()) {
-            <div class="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
-              <label class="label justify-center pb-2">
-                <span class="label-text font-bold opacity-70">Monto a abonar:</span>
-              </label>
-              <div class="flex items-center gap-3">
-                <span class="text-4xl font-black text-success">$</span>
-                <input
-                  type="number"
-                  class="input input-bordered input-lg w-full font-black text-2xl focus:input-primary"
-                  [ngModel]="montoAbonado()"
-                  (ngModelChange)="montoAbonado.set($event)"
-                  placeholder="Ej: 2500"
-                  min="1"
-                />
+            @if (esPagoParcial()) {
+              <div class="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <label class="label justify-center pb-2"
+                  ><span class="label-text font-bold opacity-70">Monto a abonar:</span></label
+                >
+                <div class="flex items-center gap-3">
+                  <span class="text-4xl font-black text-success">$</span>
+                  <input
+                    type="number"
+                    class="input input-bordered input-lg w-full font-black text-2xl"
+                    [ngModel]="montoAbonado()"
+                    (ngModelChange)="montoAbonado.set($event)"
+                    placeholder="Ej: 2500"
+                    min="1"
+                  />
+                </div>
               </div>
-            </div>
-          }
-
-          <div
-            class="flex justify-between mt-4 px-1 text-xs font-bold opacity-60 border-t border-base-200 pt-3"
-          >
-            <span>Deuda Efvo: ${{ cargo()?.deuda_efectivo }}</span>
-            <span>Deuda MP: ${{ cargo()?.deuda_transferencia }}</span>
+            }
           </div>
+        }
+
+        <!-- NUEVO TOGGLE BILLETERA VIRTUAL -->
+        @if (saldoAFavor() > 0) {
+          <div class="form-control bg-success/10 p-4 rounded-xl border border-success/30 shadow-sm">
+            <label class="cursor-pointer label">
+              <div>
+                <span class="label-text font-bold text-lg text-success flex items-center gap-2"
+                  >💳 Usar Billetera</span
+                >
+                <span class="label-text-alt font-medium opacity-70 text-success"
+                  >Disponible: ${{ saldoAFavor() }}</span
+                >
+              </div>
+              <input
+                type="checkbox"
+                class="toggle toggle-success"
+                [checked]="usarSaldo()"
+                (change)="usarSaldo.set(!usarSaldo())"
+              />
+            </label>
+          </div>
+        }
+      </div>
+
+      <!-- BOTONES DINÁMICOS -->
+      @if (usarSaldo() && restanteEfectivo() === 0) {
+        <div class="flex justify-center mb-4">
+          <button
+            class="btn btn-success btn-lg px-12 text-white shadow-xl hover:scale-105"
+            [disabled]="procesando()"
+            (click)="confirmar('SALDO_A_FAVOR')"
+          >
+            ✨ Cubrir TODO con Billetera Virtual
+          </button>
+        </div>
+      } @else {
+        <p class="font-bold mb-4 text-center text-lg">
+          ¿Con qué método se paga {{ usarSaldo() ? 'la diferencia' : '' }}?
+        </p>
+
+        <div class="grid grid-cols-2 gap-4">
+          <button
+            class="btn btn-outline btn-success flex flex-col h-auto py-4 gap-2 hover:scale-[1.02] transition-transform"
+            [disabled]="
+              procesando() || (!cargo()?.es_multiple && esPagoParcial() && !montoAbonado())
+            "
+            (click)="confirmar('EFECTIVO')"
+          >
+            <span class="text-4xl drop-shadow-sm">💵</span>
+            <span class="text-sm uppercase font-black">Efectivo</span>
+            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full"
+              >${{ restanteEfectivo() }}</span
+            >
+            @if (usarSaldo() && cubiertoConSaldoEfectivo() > 0) {
+              <span
+                class="text-[10px] font-bold mt-1 text-success bg-success/20 px-2 py-1 rounded-full"
+                >+ ${{ cubiertoConSaldoEfectivo() }} Saldo</span
+              >
+            }
+          </button>
+
+          <button
+            class="btn btn-outline btn-info flex flex-col h-auto py-4 gap-2 hover:scale-[1.02] transition-transform"
+            [disabled]="
+              procesando() || (!cargo()?.es_multiple && esPagoParcial() && !montoAbonado())
+            "
+            (click)="confirmar('MERCADOPAGO')"
+          >
+            <span class="text-4xl drop-shadow-sm">📱</span>
+            <span class="text-sm uppercase font-black">Mercado Pago</span>
+            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full"
+              >${{ restanteMP() }}</span
+            >
+            @if (usarSaldo() && cubiertoConSaldoMP() > 0) {
+              <span
+                class="text-[10px] font-bold mt-1 text-success bg-success/20 px-2 py-1 rounded-full"
+                >+ ${{ cubiertoConSaldoMP() }} Saldo</span
+              >
+            }
+          </button>
         </div>
       }
-
-      <p class="font-bold mb-4 text-center text-lg">¿Con qué método lo paga?</p>
-
-      <div class="grid grid-cols-2 gap-4">
-        <button
-          class="btn btn-outline btn-success flex flex-col h-auto py-4 gap-2 hover:scale-[1.02] transition-transform"
-          [disabled]="procesando() || (!cargo()?.es_multiple && esPagoParcial() && !montoAbonado())"
-          (click)="confirmar('EFECTIVO')"
-        >
-          <span class="text-4xl drop-shadow-sm">💵</span>
-          <span class="text-sm uppercase font-black">Efectivo</span>
-          @if (cargo()?.es_multiple || !esPagoParcial()) {
-            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full"
-              >${{ costoEfectivo() }}</span
-            >
-          }
-        </button>
-
-        <button
-          class="btn btn-outline btn-info flex flex-col h-auto py-4 gap-2 hover:scale-[1.02] transition-transform"
-          [disabled]="procesando() || (!cargo()?.es_multiple && esPagoParcial() && !montoAbonado())"
-          (click)="confirmar('MERCADOPAGO')"
-        >
-          <span class="text-4xl drop-shadow-sm">📱</span>
-          <span class="text-sm uppercase font-black">Mercado Pago</span>
-          @if (cargo()?.es_multiple || !esPagoParcial()) {
-            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full"
-              >${{ costoMP() }}</span
-            >
-          }
-        </button>
-
-        <button
-          class="btn btn-outline btn-warning flex flex-col h-auto py-4 gap-2 hover:scale-[1.02] transition-transform"
-          [disabled]="procesando() || (!cargo()?.es_multiple && esPagoParcial() && !montoAbonado())"
-          (click)="confirmar('TRANSFERENCIA')"
-        >
-          <span class="text-4xl drop-shadow-sm">🏦</span>
-          <span class="text-sm uppercase font-black">Transferencia</span>
-          @if (cargo()?.es_multiple || !esPagoParcial()) {
-            <span class="text-xl font-black bg-base-100/50 px-3 py-1 rounded-full"
-              >${{ costoMP() }}</span
-            >
-          }
-        </button>
-
-        <button
-          class="btn border-2 flex flex-col h-auto py-4 gap-2 transition-transform"
-          [ngClass]="
-            saldoAFavor() >= costoEfectivo()
-              ? 'btn-outline border-primary text-primary hover:bg-primary hover:text-white hover:scale-[1.02]'
-              : 'btn-disabled opacity-40 bg-base-200'
-          "
-          [disabled]="
-            procesando() ||
-            saldoAFavor() < costoEfectivo() ||
-            (!cargo()?.es_multiple && esPagoParcial() && !montoAbonado())
-          "
-          (click)="confirmar('SALDO_A_FAVOR')"
-        >
-          <span class="text-4xl drop-shadow-sm" [class.grayscale]="saldoAFavor() < costoEfectivo()"
-            >💳</span
-          >
-          <span class="text-sm uppercase font-black">Billetera Virtual</span>
-          <span
-            class="text-xs font-bold bg-base-100 text-base-content px-2 py-1 rounded-full mt-1 border"
-            >Disp: ${{ saldoAFavor() }}</span
-          >
-        </button>
-      </div>
     }
 
     <div class="modal-action mt-6 border-t border-base-200 pt-4">

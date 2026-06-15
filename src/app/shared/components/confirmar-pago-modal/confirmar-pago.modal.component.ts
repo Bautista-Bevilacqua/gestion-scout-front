@@ -11,15 +11,16 @@ import { FormsModule } from '@angular/forms';
 export class ConfirmarPagoModalComponent {
   cargo = input<any | null>(null);
   procesando = input<boolean>(false);
-  saldoAFavor = input<number>(0); // NUEVO INPUT
+  saldoAFavor = input<number>(0);
 
-  onConfirmar = output<{ metodo: string; monto?: number }>();
+  onConfirmar = output<{ metodo: string; monto?: number; usarSaldo: boolean }>();
   onCerrar = output<void>();
 
   montoAbonado = signal<number | null>(null);
   esPagoParcial = signal<boolean>(false);
+  usarSaldo = signal<boolean>(false);
 
-  // Computadas para limpiar el HTML
+  // Cálculos base
   costoEfectivo = computed(
     () =>
       this.montoAbonado() ||
@@ -35,10 +36,24 @@ export class ConfirmarPagoModalComponent {
       0,
   );
 
+  // Cuánto de la billetera se va a gastar según el método
+  cubiertoConSaldoEfectivo = computed(() =>
+    this.usarSaldo() ? Math.min(this.saldoAFavor(), this.costoEfectivo()) : 0,
+  );
+  cubiertoConSaldoMP = computed(() =>
+    this.usarSaldo() ? Math.min(this.saldoAFavor(), this.costoMP()) : 0,
+  );
+
+  // Cuánto falta cobrar por caja física
+  restanteEfectivo = computed(() => this.costoEfectivo() - this.cubiertoConSaldoEfectivo());
+  restanteMP = computed(() => this.costoMP() - this.cubiertoConSaldoMP());
+
   constructor() {
     effect(() => {
       const c = this.cargo();
       this.esPagoParcial.set(false);
+      this.usarSaldo.set(false);
+
       if (c && !c.es_multiple) {
         this.montoAbonado.set(c.deuda_efectivo || c.monto_efectivo);
       } else {
@@ -52,7 +67,11 @@ export class ConfirmarPagoModalComponent {
       !this.cargo()?.es_multiple && this.esPagoParcial()
         ? this.montoAbonado() || undefined
         : undefined;
-    this.onConfirmar.emit({ metodo: metodo, monto: montoFinal });
+    this.onConfirmar.emit({
+      metodo: metodo,
+      monto: montoFinal,
+      usarSaldo: this.usarSaldo(),
+    });
   }
 
   cerrar() {
