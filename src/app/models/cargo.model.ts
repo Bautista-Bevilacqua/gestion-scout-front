@@ -6,6 +6,7 @@ export interface Cargo {
   estado: 'PENDIENTE' | 'PARCIAL' | 'PAGADO' | 'ANULADO';
   fecha_cargo: string;
   concepto_nombre: string;
+  descripcion?: string;
   fecha_vencimiento?: string;
   fecha_pago?: string;
   metodo_pago?: string;
