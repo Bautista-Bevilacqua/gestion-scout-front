@@ -84,15 +84,4 @@ export class CustomValidators {
 
     return isValid ? null : { formatoNombreInvalido: true };
   }
-
-  static formatoFamilia(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    // Regex: Palabra(s) con mayúscula inicial + guion + Palabra(s) con mayúscula inicial
-    const regex =
-      /^([A-ZÁÉÍÓÚÑ][a-záéíóúñü]+(?:\s[A-ZÁÉÍÓÚÑ][a-záéíóúñü]+)*)\-([A-ZÁÉÍÓÚÑ][a-záéíóúñü]+(?:\s[A-ZÁÉÍÓÚÑ][a-záéíóúñü]+)*)$/;
-    const isValid = regex.test(control.value);
-
-    return isValid ? null : { formatoFamiliaInvalido: true };
-  }
 }

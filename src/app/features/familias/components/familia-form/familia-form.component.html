@@ -7,7 +7,7 @@
       <input
         type="text"
         formControlName="apellido_familia"
-        placeholder="Ej: Bevilacqua-Verna"
+        placeholder="Ej: Bevilacqua"
         class="input input-bordered w-full"
         [class.input-error]="campoEsInvalido('apellido_familia')"
       />
@@ -16,11 +16,8 @@
           @if (familiaForm.get('apellido_familia')?.hasError('required')) {
             <span class="label-text-alt text-error">Requerido.</span>
           }
-          @if (familiaForm.get('apellido_familia')?.hasError('formatoFamiliaInvalido')) {
-            <span class="label-text-alt text-error"
-              >Ambos apellidos deben iniciar con Mayúscula y separarse con un guion (Ej:
-              Bevilacqua-Verna).</span
-            >
+          @if (familiaForm.get('apellido_familia')?.hasError('minlength')) {
+            <span class="label-text-alt text-error">Debe tener al menos 2 caracteres.</span>
           }
         </div>
       }
@@ -28,112 +25,173 @@
 
     <div class="divider md:col-span-2">Datos de los Padres</div>
 
-    <div class="form-control flex flex-col gap-1">
-      <label class="label pb-0"><span class="label-text">Nombre del Padre</span></label>
-      <input
-        type="text"
-        formControlName="nombre_padre"
-        class="input input-bordered"
-        [class.input-error]="campoEsInvalido('nombre_padre')"
-      />
-      @if (campoEsInvalido('nombre_padre')) {
-        <div class="label py-0 flex-col items-start gap-1 mt-1">
-          @if (familiaForm.get('nombre_padre')?.hasError('required')) {
-            <span class="label-text-alt text-error">Requerido.</span>
-          }
-          @if (familiaForm.get('nombre_padre')?.hasError('formatoNombreInvalido')) {
-            <span class="label-text-alt text-error"
-              >Cada palabra debe empezar con Mayúscula (Ej: Juan Carlos).</span
-            >
-          }
-        </div>
-      }
-
-      <label class="label pb-0 mt-2"><span class="label-text">Teléfono Padre</span></label>
-      <input
-        type="text"
-        formControlName="telefono_padre"
-        class="input input-bordered"
-        [class.input-error]="campoEsInvalido('telefono_padre')"
-      />
-      @if (campoEsInvalido('telefono_padre')) {
-        <div class="label py-0 flex-col items-start gap-1 mt-1">
-          @if (familiaForm.get('telefono_padre')?.hasError('required')) {
-            <span class="label-text-alt text-error">Requerido.</span>
-          }
-          @if (familiaForm.get('telefono_padre')?.hasError('telefonoInvalido')) {
-            <span class="label-text-alt text-error">Formato incorrecto (min 8 números).</span>
-          }
-        </div>
-      }
+    <div class="form-control md:col-span-2 flex flex-row gap-8 -mt-2 mb-2">
+      <label class="label cursor-pointer gap-3">
+        <input type="checkbox" class="toggle toggle-primary" formControlName="tiene_padre" />
+        <span class="label-text font-semibold">Tiene padre</span>
+      </label>
+      <label class="label cursor-pointer gap-3">
+        <input type="checkbox" class="toggle toggle-primary" formControlName="tiene_madre" />
+        <span class="label-text font-semibold">Tiene madre</span>
+      </label>
     </div>
 
-    <div class="form-control flex flex-col gap-1">
-      <label class="label pb-0"><span class="label-text">Nombre de la Madre</span></label>
-      <input
-        type="text"
-        formControlName="nombre_madre"
-        class="input input-bordered"
-        [class.input-error]="campoEsInvalido('nombre_madre')"
-      />
-      @if (campoEsInvalido('nombre_madre')) {
-        <div class="label py-0 flex-col items-start gap-1 mt-1">
-          @if (familiaForm.get('nombre_madre')?.hasError('required')) {
-            <span class="label-text-alt text-error">Requerido.</span>
-          }
-          @if (familiaForm.get('nombre_madre')?.hasError('minlength')) {
-            <span class="label-text-alt text-error">Debe tener al menos 3 caracteres.</span>
-          }
-          @if (familiaForm.get('nombre_madre')?.hasError('formatoNombreInvalido')) {
-            <span class="label-text-alt text-error"
-              >Cada palabra debe empezar con Mayúscula (Ej: Maria Jose).</span
-            >
-          }
+    @if (familiaForm.get('tiene_padre')?.value) {
+      <div class="form-control flex flex-col gap-1">
+        <label class="label pb-0"><span class="label-text">Nombre del Padre</span></label>
+        <input
+          type="text"
+          formControlName="nombre_padre"
+          class="input input-bordered"
+          [class.input-error]="campoEsInvalido('nombre_padre')"
+        />
+        @if (campoEsInvalido('nombre_padre')) {
+          <div class="label py-0 flex-col items-start gap-1 mt-1">
+            @if (familiaForm.get('nombre_padre')?.hasError('required')) {
+              <span class="label-text-alt text-error">Requerido.</span>
+            }
+            @if (familiaForm.get('nombre_padre')?.hasError('formatoNombreInvalido')) {
+              <span class="label-text-alt text-error"
+                >Cada palabra debe empezar con Mayúscula (Ej: Juan Carlos).</span
+              >
+            }
+          </div>
+        }
+
+        <label class="label pb-0 mt-2"><span class="label-text">Teléfono Padre</span></label>
+        <input
+          type="text"
+          formControlName="telefono_padre"
+          class="input input-bordered"
+          [class.input-error]="campoEsInvalido('telefono_padre')"
+        />
+        @if (campoEsInvalido('telefono_padre')) {
+          <div class="label py-0 flex-col items-start gap-1 mt-1">
+            @if (familiaForm.get('telefono_padre')?.hasError('required')) {
+              <span class="label-text-alt text-error">Requerido.</span>
+            }
+            @if (familiaForm.get('telefono_padre')?.hasError('telefonoInvalido')) {
+              <span class="label-text-alt text-error">Formato incorrecto (min 8 números).</span>
+            }
+          </div>
+        }
+
+        <label class="label pb-0 mt-2"><span class="label-text">Email del Padre</span></label>
+        <input
+          type="email"
+          formControlName="email_padre"
+          class="input input-bordered"
+          [class.input-error]="campoEsInvalido('email_padre')"
+        />
+        @if (campoEsInvalido('email_padre')) {
+          <div class="label py-0 flex-col items-start gap-1 mt-1">
+            @if (familiaForm.get('email_padre')?.hasError('required')) {
+              <span class="label-text-alt text-error">Requerido.</span>
+            }
+            @if (familiaForm.get('email_padre')?.hasError('emailInvalido')) {
+              <span class="label-text-alt text-error">Formato de correo incorrecto.</span>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (familiaForm.get('tiene_madre')?.value) {
+      <div class="form-control flex flex-col gap-1">
+        <label class="label pb-0"><span class="label-text">Nombre de la Madre</span></label>
+        <input
+          type="text"
+          formControlName="nombre_madre"
+          class="input input-bordered"
+          [class.input-error]="campoEsInvalido('nombre_madre')"
+        />
+        @if (campoEsInvalido('nombre_madre')) {
+          <div class="label py-0 flex-col items-start gap-1 mt-1">
+            @if (familiaForm.get('nombre_madre')?.hasError('required')) {
+              <span class="label-text-alt text-error">Requerido.</span>
+            }
+            @if (familiaForm.get('nombre_madre')?.hasError('minlength')) {
+              <span class="label-text-alt text-error">Debe tener al menos 3 caracteres.</span>
+            }
+            @if (familiaForm.get('nombre_madre')?.hasError('formatoNombreInvalido')) {
+              <span class="label-text-alt text-error"
+                >Cada palabra debe empezar con Mayúscula (Ej: Maria Jose).</span
+              >
+            }
+          </div>
+        }
+
+        <label class="label pb-0 mt-2"><span class="label-text">Teléfono Madre</span></label>
+        <input
+          type="text"
+          formControlName="telefono_madre"
+          class="input input-bordered"
+          [class.input-error]="campoEsInvalido('telefono_madre')"
+        />
+        @if (campoEsInvalido('telefono_madre')) {
+          <div class="label py-0 flex-col items-start gap-1 mt-1">
+            @if (familiaForm.get('telefono_madre')?.hasError('required')) {
+              <span class="label-text-alt text-error">Requerido.</span>
+            }
+            @if (familiaForm.get('telefono_madre')?.hasError('telefonoInvalido')) {
+              <span class="label-text-alt text-error">Formato incorrecto (min 8 números).</span>
+            }
+          </div>
+        }
+
+        <label class="label pb-0 mt-2"><span class="label-text">Email de la Madre</span></label>
+        <input
+          type="email"
+          formControlName="email_madre"
+          class="input input-bordered"
+          [class.input-error]="campoEsInvalido('email_madre')"
+        />
+        @if (campoEsInvalido('email_madre')) {
+          <div class="label py-0 flex-col items-start gap-1 mt-1">
+            @if (familiaForm.get('email_madre')?.hasError('required')) {
+              <span class="label-text-alt text-error">Requerido.</span>
+            }
+            @if (familiaForm.get('email_madre')?.hasError('emailInvalido')) {
+              <span class="label-text-alt text-error">Formato de correo incorrecto.</span>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (ambosProgenitoresActivos) {
+      <div class="form-control md:col-span-2 flex flex-col gap-1">
+        <span class="label-text font-semibold mb-1"
+          >¿Quién es el contacto principal? (a esa persona le llegan los recibos por mail)</span
+        >
+        <div class="flex gap-6">
+          <label class="label cursor-pointer gap-2">
+            <input
+              type="radio"
+              name="contacto_principal"
+              value="PADRE"
+              formControlName="contacto_principal"
+              class="radio radio-primary"
+            />
+            <span class="label-text">Padre</span>
+          </label>
+          <label class="label cursor-pointer gap-2">
+            <input
+              type="radio"
+              name="contacto_principal"
+              value="MADRE"
+              formControlName="contacto_principal"
+              class="radio radio-primary"
+            />
+            <span class="label-text">Madre</span>
+          </label>
         </div>
-      }
+      </div>
+    }
 
-      <label class="label pb-0 mt-2"><span class="label-text">Teléfono Madre</span></label>
-      <input
-        type="text"
-        formControlName="telefono_madre"
-        class="input input-bordered"
-        [class.input-error]="campoEsInvalido('telefono_madre')"
-      />
-      @if (campoEsInvalido('telefono_madre')) {
-        <div class="label py-0 flex-col items-start gap-1 mt-1">
-          @if (familiaForm.get('telefono_madre')?.hasError('required')) {
-            <span class="label-text-alt text-error">Requerido.</span>
-          }
-          @if (familiaForm.get('telefono_madre')?.hasError('telefonoInvalido')) {
-            <span class="label-text-alt text-error">Formato incorrecto (min 8 números).</span>
-          }
-        </div>
-      }
-    </div>
+    <div class="divider md:col-span-2">Otros Datos</div>
 
-    <div class="divider md:col-span-2">Contacto General</div>
-
-    <div class="form-control flex flex-col gap-1">
-      <label class="label pb-0"><span class="label-text">Email de la Familia</span></label>
-      <input
-        type="email"
-        formControlName="email"
-        class="input input-bordered"
-        [class.input-error]="campoEsInvalido('email')"
-      />
-      @if (campoEsInvalido('email')) {
-        <div class="label py-0 flex-col items-start gap-1 mt-1">
-          @if (familiaForm.get('email')?.hasError('required')) {
-            <span class="label-text-alt text-error">Requerido.</span>
-          }
-          @if (familiaForm.get('email')?.hasError('emailInvalido')) {
-            <span class="label-text-alt text-error">Formato de correo incorrecto.</span>
-          }
-        </div>
-      }
-    </div>
-
-    <div class="form-control flex flex-col gap-1">
+    <div class="form-control flex flex-col gap-1 md:col-span-2">
       <label class="label pb-0"><span class="label-text">Dirección</span></label>
       <input
         type="text"

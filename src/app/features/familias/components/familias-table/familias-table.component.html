@@ -15,14 +15,7 @@
         </th>
         <th>Padres</th>
         <th>Contactos</th>
-        <th (click)="cambiarOrden('email')" class="cursor-pointer hover:bg-base-200 select-none">
-          <div class="flex items-center gap-1">
-            Email
-            <span>{{
-              sortField() === 'email' ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕'
-            }}</span>
-          </div>
-        </th>
+        <th>Email</th>
         @if (isGerencia()) {
           <th class="text-center">Acciones</th>
         }
@@ -33,17 +26,35 @@
         <tr class="hover">
           <td class="font-bold text-lg">{{ f.apellido_familia }}</td>
           <td>
-            <div class="text-sm">👨 {{ f.nombre_padre || '-' }}</div>
-            <div class="text-sm">👩 {{ f.nombre_madre || '-' }}</div>
+            @if (f.tiene_padre) {
+              <div class="text-sm">
+                👨 {{ f.nombre_padre || '-' }}
+                @if (f.contacto_principal === 'PADRE') {
+                  <span class="badge badge-primary badge-xs align-middle">Principal</span>
+                }
+              </div>
+            }
+            @if (f.tiene_madre) {
+              <div class="text-sm">
+                👩 {{ f.nombre_madre || '-' }}
+                @if (f.contacto_principal === 'MADRE') {
+                  <span class="badge badge-primary badge-xs align-middle">Principal</span>
+                }
+              </div>
+            }
           </td>
           <td>
             <div class="flex flex-col gap-1">
-              <div class="badge badge-ghost badge-sm py-3">📞 {{ f.telefono_padre || '-' }}</div>
-              <div class="badge badge-ghost badge-sm py-3">📞 {{ f.telefono_madre || '-' }}</div>
+              @if (f.tiene_padre) {
+                <div class="badge badge-ghost badge-sm py-3">📞 {{ f.telefono_padre || '-' }}</div>
+              }
+              @if (f.tiene_madre) {
+                <div class="badge badge-ghost badge-sm py-3">📞 {{ f.telefono_madre || '-' }}</div>
+              }
             </div>
           </td>
           <td>
-            <span class="opacity-70 italic text-sm">{{ f.email || 'Sin correo' }}</span>
+            <span class="opacity-70 italic text-sm">{{ emailContacto(f) || 'Sin correo' }}</span>
           </td>
 
           @if (isGerencia()) {

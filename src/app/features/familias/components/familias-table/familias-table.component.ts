@@ -60,4 +60,8 @@ export class TablaFamiliasComponent {
   eliminar(f: Familia) {
     this.onEliminar.emit(f);
   }
+
+  emailContacto(f: Familia): string | undefined {
+    return f.contacto_principal === 'MADRE' ? f.email_madre : f.email_padre;
+  }
 }
