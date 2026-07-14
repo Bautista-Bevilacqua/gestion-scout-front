@@ -12,14 +12,30 @@
       </h1>
       <p class="text-base-content/60 text-lg">Historial contable y gestión de cobros</p>
     </div>
+  </div>
 
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
     <div class="stats shadow bg-base-100 border-t-4 border-error">
       <div class="stat">
-        <div class="stat-title">Deuda Histórica</div>
-        <div class="stat-value text-error">
-          ${{ deudaTotal() }} <span class="text-sm font-normal text-base-content/60">en efvo.</span>
+        <div class="stat-title font-bold text-error">Deuda Histórica</div>
+        <div class="stat-value text-error">${{ deudaTotal() }}</div>
+        <div class="stat-desc">Monto total pendiente de cobro</div>
+      </div>
+    </div>
+
+    <div class="stats shadow bg-base-100 border-t-4 border-success relative overflow-visible">
+      <div class="stat">
+        <div class="stat-title font-bold text-success">💳 Billetera Virtual</div>
+        <div class="stat-value text-success">${{ beneficiario()?.saldo_a_favor || 0 }}</div>
+        <div class="stat-desc">Plata a favor disponible</div>
+        <div class="absolute right-6 top-1/2 -translate-y-1/2">
+          <button
+            class="btn btn-success btn-sm text-white shadow-md font-bold"
+            (click)="abrirModalSaldo()"
+          >
+            ➕ Cargar
+          </button>
         </div>
-        <div class="stat-desc">Pendiente acumulado</div>
       </div>
     </div>
   </div>
@@ -270,6 +286,7 @@
 <app-confirmar-pago-modal
   [cargo]="cargoAAsignar()"
   [procesando]="procesandoPago()"
+  [saldoAFavor]="beneficiario()?.saldo_a_favor || 0"
   (onConfirmar)="ejecutarPago($event)"
   (onCerrar)="cerrarModalCobro()"
 ></app-confirmar-pago-modal>
@@ -286,3 +303,48 @@
   (confirmar)="confirmarBorradoCargo()"
 >
 </app-confirm-modal>
+
+<dialog id="modal_cargar_saldo" class="modal">
+  <div class="modal-box border-t-4 border-success">
+    <h3 class="font-bold text-2xl mb-2 text-success">Cargar Saldo a Favor</h3>
+    <p class="text-sm opacity-70 mb-6">
+      El monto ingresado quedará en la billetera virtual del chico y sumará al Libro Diario de la
+      Caja hoy.
+    </p>
+
+    <form [formGroup]="modalSaldoForm" (ngSubmit)="guardarSaldo()" class="flex flex-col gap-4">
+      <label class="form-control w-full">
+        <div class="label"><span class="label-text font-bold">Monto que entrega ($)</span></div>
+        <input
+          type="number"
+          formControlName="monto"
+          class="input input-bordered w-full font-black text-xl"
+          placeholder="Ej: 15000"
+        />
+      </label>
+
+      <label class="form-control w-full">
+        <div class="label"><span class="label-text font-bold">Medio de ingreso físico</span></div>
+        <select formControlName="metodoPago" class="select select-bordered w-full font-bold">
+          <option value="EFECTIVO">💵 Efectivo (Billetes)</option>
+          <option value="TRANSFERENCIA">🏦 Transferencia Bancaria</option>
+          <option value="MERCADOPAGO">📱 Mercado Pago</option>
+        </select>
+      </label>
+
+      <div class="modal-action mt-6">
+        <button type="button" class="btn btn-ghost" onclick="modal_cargar_saldo.close()">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-success"
+          [disabled]="modalSaldoForm.invalid || guardandoSaldo()"
+        >
+          {{ guardandoSaldo() ? 'Cargando...' : 'Confirmar Carga' }}
+        </button>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>

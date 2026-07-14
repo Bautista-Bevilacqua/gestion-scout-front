@@ -19,19 +19,35 @@ export class CargoService {
     idCargo: number,
     metodoPago: string = 'EFECTIVO',
     montoAbonado?: number,
+    usarSaldo: boolean = false,
   ): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${idCargo}/pagar`, { metodoPago, montoAbonado });
+    return this.http.post(`${this.apiUrl}/${idCargo}/pagar`, {
+      metodoPago,
+      montoAbonado,
+      usarSaldo,
+    });
   }
 
   asignarIndividual(idBeneficiario: number, idConcepto: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/individual`, { idBeneficiario, idConcepto });
   }
 
-  pagarMultiplesCargos(ids: number[], metodoPago: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/pagar-multiples`, { ids, metodoPago });
+  pagarMultiplesCargos(
+    ids: number[],
+    metodoPago: string,
+    usarSaldo: boolean = false,
+  ): Observable<any> {
+    return this.http.post(`${this.apiUrl}/pagar-multiples`, { ids, metodoPago, usarSaldo });
   }
 
   eliminarCargo(idCargo: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${idCargo}`);
+  }
+
+  cargarSaldoAFavor(idBeneficiario: number, monto: number, metodoPago: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/beneficiario/${idBeneficiario}/cargar-saldo`, {
+      monto,
+      metodoPago,
+    });
   }
 }
