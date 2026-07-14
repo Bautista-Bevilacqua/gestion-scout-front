@@ -46,7 +46,8 @@ export class FamiliaListComponent implements OnInit {
         f.apellido_familia?.toLowerCase().includes(busca) ||
         f.nombre_padre?.toLowerCase().includes(busca) ||
         f.nombre_madre?.toLowerCase().includes(busca) ||
-        f.email?.toLowerCase().includes(busca),
+        f.email_padre?.toLowerCase().includes(busca) ||
+        f.email_madre?.toLowerCase().includes(busca),
     );
   });
 
