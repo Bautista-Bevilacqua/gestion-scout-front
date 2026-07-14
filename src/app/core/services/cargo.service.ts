@@ -32,6 +32,18 @@ export class CargoService {
     return this.http.post(`${this.apiUrl}/individual`, { idBeneficiario, idConcepto });
   }
 
+  crearCargoPersonalizado(
+    idBeneficiario: number,
+    monto: number,
+    descripcion?: string,
+  ): Observable<any> {
+    return this.http.post(`${this.apiUrl}/personalizado`, {
+      idBeneficiario,
+      monto,
+      descripcion,
+    });
+  }
+
   pagarMultiplesCargos(
     ids: number[],
     metodoPago: string,

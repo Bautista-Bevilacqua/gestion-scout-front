@@ -45,6 +45,13 @@ export class CuentaCorrientePageComponent implements OnInit {
   });
   public guardandoSaldo = signal(false);
 
+  // NUEVO: Formulario para agregar una deuda personalizada (sin concepto)
+  public modalDeudaForm = this.fb.group({
+    monto: ['', [Validators.required, Validators.min(1)]],
+    descripcion: [''],
+  });
+  public guardandoDeuda = signal(false);
+
   public totalSeleccionadoEfectivo = computed(() => {
     return this.cargos()
       .filter((c) => this.seleccionados().has(c.id_cargo))
@@ -162,6 +169,35 @@ export class CuentaCorrientePageComponent implements OnInit {
         alert(err.error?.message || 'Error al cargar saldo');
       },
     });
+  }
+
+  // --- LOGICA DE DEUDA PERSONALIZADA ---
+  abrirModalDeuda() {
+    this.modalDeudaForm.reset({ monto: '', descripcion: '' });
+    (document.getElementById('modal_agregar_deuda') as HTMLDialogElement)?.showModal();
+  }
+
+  guardarDeuda() {
+    if (this.modalDeudaForm.invalid) return;
+    const id = this.beneficiario()?.id_beneficiario;
+    if (!id) return;
+
+    this.guardandoDeuda.set(true);
+    const vals = this.modalDeudaForm.value;
+
+    this.cargoService
+      .crearCargoPersonalizado(id, Number(vals.monto), vals.descripcion || undefined)
+      .subscribe({
+        next: () => {
+          this.guardandoDeuda.set(false);
+          (document.getElementById('modal_agregar_deuda') as HTMLDialogElement)?.close();
+          this.cargarDatos(id);
+        },
+        error: (err: any) => {
+          this.guardandoDeuda.set(false);
+          alert(err.error?.message || 'Error al agregar la deuda');
+        },
+      });
   }
 
   // --- RESTO DE TUS FUNCIONES (Sin cambios) ---

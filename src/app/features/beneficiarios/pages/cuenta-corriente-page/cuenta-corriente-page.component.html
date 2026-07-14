@@ -81,6 +81,15 @@
               Asignar al beneficiario
             }
           </button>
+
+          <div class="divider text-xs opacity-50">O</div>
+
+          <p class="text-sm text-base-content/70 mb-2">
+            Cargar una deuda personal (sin concepto), por un monto propio de este beneficiario.
+          </p>
+          <button class="btn btn-outline btn-primary w-full" (click)="abrirModalDeuda()">
+            ➕ Agregar deuda
+          </button>
         </div>
       </div>
     </div>
@@ -342,6 +351,54 @@
           [disabled]="modalSaldoForm.invalid || guardandoSaldo()"
         >
           {{ guardandoSaldo() ? 'Cargando...' : 'Confirmar Carga' }}
+        </button>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+
+<dialog id="modal_agregar_deuda" class="modal">
+  <div class="modal-box border-t-4 border-primary">
+    <h3 class="font-bold text-2xl mb-2 text-primary">Agregar Deuda</h3>
+    <p class="text-sm opacity-70 mb-6">
+      Deuda personal de este beneficiario, sin asociar a ningún concepto de cobro. El mismo monto
+      aplica para efectivo y transferencia.
+    </p>
+
+    <form [formGroup]="modalDeudaForm" (ngSubmit)="guardarDeuda()" class="flex flex-col gap-4">
+      <label class="form-control w-full">
+        <div class="label"><span class="label-text font-bold">Monto de la deuda ($)</span></div>
+        <input
+          type="number"
+          formControlName="monto"
+          class="input input-bordered w-full font-black text-xl"
+          placeholder="Ej: 5000"
+        />
+      </label>
+
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text font-bold">Descripción (opcional)</span>
+        </div>
+        <input
+          type="text"
+          formControlName="descripcion"
+          class="input input-bordered w-full"
+          placeholder="Ej: Campamento julio - diferencia"
+        />
+      </label>
+
+      <div class="modal-action mt-6">
+        <button type="button" class="btn btn-ghost" onclick="modal_agregar_deuda.close()">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="modalDeudaForm.invalid || guardandoDeuda()"
+        >
+          {{ guardandoDeuda() ? 'Guardando...' : 'Agregar deuda' }}
         </button>
       </div>
     </form>
